@@ -1,2 +1,2 @@
-# accessbility4al
+# accessbility4all
 hackathon for humanity
