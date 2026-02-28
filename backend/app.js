@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const PORT = 3000; // --> .env file
+const PORT = 8080; // --> .env file
 
 // Define a basic GET route
 app.get('/', (req, res) => {
