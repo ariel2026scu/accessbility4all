@@ -5,6 +5,7 @@ import logging
 import ollama
 import pyttsx3
 import tempfile
+from services.text_chunker import TextChunker
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,6 +18,7 @@ class SimplyLegal_main:
     def __init__(self):
         self.engine = pyttsx3.init()
         self.is_busy = False
+        self.chunker = TextChunker()
 
         # Load configuration from environment variables
         self.llm_model = os.getenv("LLM_MODEL", "deepseek-r1:8b")
@@ -78,6 +80,35 @@ class SimplyLegal_main:
                 os.unlink(temp_file.name)
 
     def process_text(self, input_text: str) -> dict:
-        simplified_text = self.ask_ai(input_text)
+        """
+        Process text through chunking, LLM translation, and TTS.
+
+        Returns:
+            dict with keys: text, audio, chunks_processed
+        """
+        # Chunk the text if needed
+        chunks = self.chunker.chunk_text(input_text)
+        logger.info(f"Processing {len(chunks)} chunk(s)")
+
+        # Process each chunk through LLM
+        translated_chunks = []
+        for i, chunk in enumerate(chunks, 1):
+            logger.info(f"Processing chunk {i}/{len(chunks)} ({len(chunk)} chars)")
+            try:
+                translated_chunk = self.ask_ai(chunk)
+                translated_chunks.append(translated_chunk)
+            except Exception as e:
+                logger.error(f"Error processing chunk {i}: {e}")
+                raise
+
+        # Merge translated chunks
+        simplified_text = self.chunker.merge_chunks(translated_chunks)
+
+        # Generate audio from combined text
         audio_bytes = self.tts_to_bytes(simplified_text)
-        return {"text": simplified_text, "audio": audio_bytes}
+
+        return {
+            "text": simplified_text,
+            "audio": audio_bytes,
+            "chunks_processed": len(chunks)
+        }

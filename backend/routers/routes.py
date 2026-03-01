@@ -71,6 +71,7 @@ async def get_llm_output(request: LLMRequest):
         return {
             "text": result["text"],
             "audio": audio_b64,
+            "chunks_processed": result.get("chunks_processed", 1),
             "status": "success"
         }
 

@@ -39,8 +39,8 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: flex-start;   /* important */
-  padding: 80px 20px;        /* creates visual centering */
+  align-items: flex-start;
+  padding: 80px 20px;
 }
 
 /* OUTER (circled area) = dark brown */
@@ -59,6 +59,34 @@ body {
   text-align: center;
   padding-bottom: 18px;
   border-bottom: 1px solid rgba(231, 220, 205, 0.12);
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.btnToggle {
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnToggle.active {
+  background: var(--gold);
+  color: #1b1712;
+  border-color: var(--gold);
+}
+
+.btnToggle:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .badge {
@@ -228,7 +256,7 @@ textarea:focus {
   border-color: rgba(183, 154, 88, 0.95);
 }
 
-/* Ghost buttons: work on both dark and white sections */
+/* Ghost buttons */
 .btnGhost {
   background: transparent;
   color: inherit;
@@ -305,7 +333,7 @@ textarea:focus {
   font-size: 13px;
 }
 
-/* footer readable on dark brown */
+/* footer */
 .footer {
   margin-top: 18px;
   padding-top: 14px;
@@ -317,8 +345,104 @@ textarea:focus {
   font-size: 13px;
 }
 
-/* screen-reader only */
 .srOnly {
   position: absolute;
   left: -9999px;
+}
+
+/* Reading Mode Adjustments */
+.reading-mode.page {
+  padding: 40px 20px;
+  background: #fdfdfd !important;
+  color: #000 !important;
+  min-height: 100vh;
+}
+
+.reading-mode .card {
+  max-width: 800px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.reading-mode .header {
+  border-bottom: 2px solid #000;
+  padding-bottom: 24px;
+}
+
+.reading-mode .btnToggle {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+  font-size: 18px;
+}
+
+.reading-mode .badge,
+.reading-mode .subtitle,
+.reading-mode .exampleBtns,
+.reading-mode .panelHint,
+.reading-mode .footer,
+.reading-mode .hardWords {
+  display: none !important;
+}
+
+.reading-mode .title {
+  color: #000;
+  font-size: 64px;
+}
+
+.reading-mode .grid {
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+
+.reading-mode .panel {
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 0;
+  padding: 30px;
+}
+
+.reading-mode .panelHeader h2 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.reading-mode textarea,
+.reading-mode .outputBox {
+  font-size: 24px;
+  line-height: 1.8;
+  border: 3px solid #000;
+  background: #fff;
+  color: #000;
+  min-height: 300px;
+  border-radius: 0;
+}
+
+.reading-mode .actions {
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.reading-mode .btn {
+  font-size: 24px;
+  padding: 16px 32px;
+  font-weight: 800;
+  border: 3px solid #000;
+  border-radius: 0;
+}
+
+.reading-mode .btnPrimary {
+  background: #000;
+  color: #fff;
+}
+
+.reading-mode .btnDanger {
+  color: #7b2d2d;
+}
+
+.reading-mode .btnGhost {
+  background: transparent;
+  color: #000;
 }

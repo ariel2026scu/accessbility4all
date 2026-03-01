@@ -7,6 +7,7 @@ function App() {
   const [outputText, setOutputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isReadingMode, setIsReadingMode] = useState(false);
 
   const legalExample =
     "Pursuant to the provisions herein, the undersigned hereby agrees to indemnify and hold harmless the Company from any and all claims arising therefrom.";
@@ -110,13 +111,34 @@ function App() {
     }
   }
 
+  function handleReadAloud() {
+    if (!outputText) return;
+
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(outputText);
+    utterance.rate = 0.9; // slightly slower for clarity
+    utterance.pitch = 1.0;
+
+    window.speechSynthesis.speak(utterance);
+  }
+
   const translateDisabled = isLoading || inputText.trim().length === 0;
 
   return (
-    <div className="page">
+    <div className={`page ${isReadingMode ? "reading-mode" : ""}`}>
       <div className="card">
         <header className="header">
-          <div className="badge">Courtroom Mode</div>
+          <div className="headerTop">
+            <div className="badge">Courtroom Mode</div>
+            <button
+              className={`btn btnToggle ${isReadingMode ? "active" : ""}`}
+              onClick={() => setIsReadingMode(!isReadingMode)}
+            >
+              {isReadingMode ? "Disable Reading Mode" : "Enable Reading Mode"}
+            </button>
+          </div>
           <h1 className="title">PlainSpeak</h1>
           <p className="subtitle">
             Translate legalese or old English into clear, readable language.
@@ -226,6 +248,15 @@ function App() {
             </div>
 
             <div className="actions">
+              <button
+                className="btn btnPrimary"
+                type="button"
+                onClick={handleReadAloud}
+                disabled={outputText.trim().length === 0}
+              >
+                Read Aloud
+              </button>
+
               <button
                 className="btn btnGhost"
                 type="button"
