@@ -379,6 +379,15 @@ function App() {
           <span>© {new Date().getFullYear()} SimplyLegal LLP</span>
         </footer>
       </main>
+        {isReadingMode && (
+          <button
+            onClick={() => setIsReadingMode(false)}
+            className="fixed bottom-6 left-8 bg-gray-200 text-gray-700 w-14 h-14 rounded-full shadow-md flex items-center justify-center hover:bg-gray-300 hover:scale-105 transition-all duration-200 z-50"
+            title="Exit Focus Mode"
+          >
+            <span className="text-2xl font-semibold">→</span>
+          </button>
+        )}
     </div>
   );
 }
