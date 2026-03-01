@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 
 const DEV_MODE = import.meta.env.VITE_DEV_MODE === "true";
@@ -7,19 +7,27 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 function App() {
   const [inputText, setInputText] = useState("");
   const [mode, setMode] = useState("legal");
+
   const [outputText, setOutputText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // backend / dev mock delay
+  const [isTyping, setIsTyping] = useState(false);   // typing animation
+
   const [copied, setCopied] = useState(false);
   const [isReadingMode, setIsReadingMode] = useState(false);
   const [audioData, setAudioData] = useState(null);
   const [apiError, setApiError] = useState(null);
+
+  // typing animation refs
+  const typingTimerRef = useRef(null);
+  const debounceRef = useRef(null);
+  const targetRef = useRef("");
 
   const legalExample =
     "Pursuant to the provisions herein, the undersigned hereby agrees to indemnify and hold harmless the Company from any and all claims arising therefrom.";
   const oldEnglishExample =
     "Thou art wise, and I beseech thee to lend me thine counsel, for I know not what I should do.";
 
-  // super simple "hard words" detector (demo-only)
+  // hard words detector
   const hardWordList = useMemo(() => {
     const hardWords = [
       "hereinafter",
@@ -76,17 +84,75 @@ function App() {
     return result;
   }
 
+  function stopTyping() {
+    if (typingTimerRef.current) {
+      clearInterval(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+    setIsTyping(false);
+  }
+
+  // Only animate the "new" part if user is just appending
+  function startTyping(fullText) {
+    if (fullText === targetRef.current) return;
+    targetRef.current = fullText;
+
+    setCopied(false);
+
+    if (!fullText) {
+      stopTyping();
+      setOutputText("");
+      return;
+    }
+
+    setOutputText((currentShown) => {
+      const isAppendOnly =
+        fullText.length >= currentShown.length && fullText.startsWith(currentShown);
+
+      if (!isAppendOnly) {
+        stopTyping();
+        return fullText;
+      }
+
+      if (typingTimerRef.current) clearInterval(typingTimerRef.current);
+
+      setIsTyping(true);
+      let i = currentShown.length;
+
+      typingTimerRef.current = setInterval(() => {
+        i++;
+        setOutputText(fullText.slice(0, i));
+
+        if (i >= fullText.length) {
+          clearInterval(typingTimerRef.current);
+          typingTimerRef.current = null;
+          setIsTyping(false);
+        }
+      }, 12);
+
+      return currentShown;
+    });
+  }
+
   async function handleTranslate() {
     setCopied(false);
     setApiError(null);
     setAudioData(null);
+
+    // don’t translate empty
+    if (inputText.trim().length === 0) {
+      stopTyping();
+      setOutputText("");
+      return;
+    }
+
     setIsLoading(true);
 
     if (DEV_MODE) {
-      // Dev mode: use mock translation without calling the backend
+      // Dev mode: mock translation (animated)
       setTimeout(() => {
         const result = fakeTranslate(inputText, mode);
-        setOutputText(result);
+        startTyping(result);
         setIsLoading(false);
       }, 450);
       return;
@@ -97,7 +163,7 @@ function App() {
       const response = await fetch(`${API_URL}/llm_output`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: inputText }),
+        body: JSON.stringify({ text: inputText, mode }), // mode optional; backend may ignore
       });
 
       if (!response.ok) {
@@ -106,10 +172,11 @@ function App() {
       }
 
       const data = await response.json();
-      setOutputText(data.text);
+      startTyping(data.text || "");
       setAudioData(data.audio ?? null);
     } catch (error) {
       setApiError(error.message);
+      stopTyping();
       setOutputText("");
     } finally {
       setIsLoading(false);
@@ -118,25 +185,29 @@ function App() {
 
   function handleClear() {
     setInputText("");
+    stopTyping();
     setOutputText("");
     setCopied(false);
     setAudioData(null);
     setApiError(null);
+    targetRef.current = "";
   }
 
   function handleExample(which) {
     if (which === "legal") {
       setMode("legal");
       setInputText(legalExample);
-      setOutputText("");
     } else {
       setMode("oldEnglish");
       setInputText(oldEnglishExample);
-      setOutputText("");
     }
+
+    stopTyping();
+    setOutputText("");
     setCopied(false);
     setAudioData(null);
     setApiError(null);
+    targetRef.current = "";
   }
 
   async function handleCopy() {
@@ -145,14 +216,13 @@ function App() {
       setCopied(true);
       setTimeout(() => setCopied(false), 1200);
     } catch (e) {
-      // clipboard unavailable — silently ignore
+      // ignore
     }
   }
 
   function handleReadAloud() {
     if (!outputText) return;
 
-    // Use backend-generated WAV audio when available
     if (audioData) {
       const binary = atob(audioData);
       const bytes = new Uint8Array(binary.length);
@@ -166,7 +236,6 @@ function App() {
       return;
     }
 
-    // Fallback: browser speech synthesis (dev mode or no backend audio)
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(outputText);
     utterance.rate = 0.9;
@@ -174,7 +243,39 @@ function App() {
     window.speechSynthesis.speak(utterance);
   }
 
-  const translateDisabled = isLoading || inputText.trim().length === 0;
+  // DEV_MODE: auto-translate while typing (debounced) like your “second” version
+  useEffect(() => {
+    if (!DEV_MODE) return;
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (inputText.trim().length === 0) {
+      stopTyping();
+      setOutputText("");
+      return;
+    }
+
+    debounceRef.current = setTimeout(() => {
+      const full = fakeTranslate(inputText, mode);
+      startTyping(full);
+    }, 250);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputText, mode]);
+
+  useEffect(() => {
+    return () => {
+      stopTyping();
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const translateDisabled =
+    isLoading || isTyping || inputText.trim().length === 0;
 
   return (
     <div className={`page ${isReadingMode ? "reading-mode" : ""}`}>
@@ -190,12 +291,14 @@ function App() {
             <div className="badge">Courtroom Mode</div>
             <button
               className={`btn btnToggle ${isReadingMode ? "active" : ""}`}
+              type="button"
               onClick={() => setIsReadingMode(!isReadingMode)}
             >
               {isReadingMode ? "Disable Reading Mode" : "Enable Reading Mode"}
             </button>
           </div>
-          <h1 className="title">PlainSpeak</h1>
+
+          <h1 className="title">SimplyLegal</h1>
           <p className="subtitle">
             Translate legalese or old English into clear, readable language.
           </p>
@@ -258,14 +361,13 @@ function App() {
                 onClick={handleTranslate}
                 disabled={translateDisabled}
               >
-                {isLoading ? "Translating..." : "Translate"}
+                {isLoading || isTyping ? "Translating..." : "Translate"}
               </button>
 
               <button
                 className="btn btnDanger"
                 type="button"
                 onClick={handleClear}
-                disabled={isLoading && inputText.trim().length === 0}
               >
                 Clear
               </button>
@@ -296,16 +398,23 @@ function App() {
           <section className="panel">
             <div className="panelHeader">
               <h2>Simplified Text</h2>
-              <div className="panelHint">Your clear version appears here</div>
+              <div className="panelHint">
+                {isTyping ? "Translating…" : "Your clear version appears here"}
+              </div>
             </div>
 
             <div className="outputBox" aria-live="polite">
               {outputText.trim().length === 0 ? (
                 <div className="outputPlaceholder">
-                  No output yet. Paste text and press Translate.
+                  {DEV_MODE
+                    ? "Start typing on the left to see the translation appear here."
+                    : "No output yet. Paste text and press Translate."}
                 </div>
               ) : (
-                <div className="outputText">{outputText}</div>
+                <div className="outputText">
+                  {outputText}
+                  {isTyping && <span className="cursor">|</span>}
+                </div>
               )}
             </div>
 
@@ -333,9 +442,7 @@ function App() {
 
         <footer className="footer">
           <div className="footerNote">
-            {DEV_MODE
-              ? "Dev Mode: using mock translation. Set VITE_DEV_MODE=false to call the real backend."
-              : `Connected to backend at ${API_URL}`}
+            © {new Date().getFullYear()} SimplyLegal. All rights reserved.
           </div>
         </footer>
       </div>
