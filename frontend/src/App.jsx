@@ -341,7 +341,6 @@ function App() {
                   className="w-full bg-blue-900/30 border border-blue-800 rounded-sm p-3 text-sm focus:outline-none focus:border-legal-gold transition-colors"
                 >
                   <option value="legal">Legalese → Plain English</option>
-                  <option value="oldEnglish">Old English → Modern English</option>
                 </select>
               </div>
 
