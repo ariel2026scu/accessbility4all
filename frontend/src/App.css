@@ -446,3 +446,31 @@ textarea:focus {
   background: transparent;
   color: #000;
 }
+
+/* ── Dev mode banner ── */
+.devBanner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background: #7a5c00;
+  color: #ffe98a;
+  font-size: 12px;
+  font-family: monospace;
+  text-align: center;
+  padding: 5px 12px;
+  letter-spacing: 0.03em;
+}
+
+/* ── API error message ── */
+.apiError {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #4a1a1a;
+  border: 1px solid #7b2d2d;
+  border-radius: 6px;
+  color: #f4a0a0;
+  font-size: 13px;
+  line-height: 1.5;
+}

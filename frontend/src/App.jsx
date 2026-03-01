@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import "./App.css";
 
+const DEV_MODE = import.meta.env.VITE_DEV_MODE === "true";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+
 function App() {
   const [inputText, setInputText] = useState("");
   const [mode, setMode] = useState("legal");
@@ -8,13 +11,15 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isReadingMode, setIsReadingMode] = useState(false);
+  const [audioData, setAudioData] = useState(null);
+  const [apiError, setApiError] = useState(null);
 
   const legalExample =
     "Pursuant to the provisions herein, the undersigned hereby agrees to indemnify and hold harmless the Company from any and all claims arising therefrom.";
   const oldEnglishExample =
     "Thou art wise, and I beseech thee to lend me thine counsel, for I know not what I should do.";
 
-  // super simple “hard words” detector (demo-only)
+  // super simple "hard words" detector (demo-only)
   const hardWordList = useMemo(() => {
     const hardWords = [
       "hereinafter",
@@ -43,6 +48,7 @@ function App() {
     return found;
   }, [inputText]);
 
+  // Dev-mode mock translation (no backend required)
   function fakeTranslate(text, currentMode) {
     let result = text;
 
@@ -70,22 +76,52 @@ function App() {
     return result;
   }
 
-  function handleTranslate() {
+  async function handleTranslate() {
     setCopied(false);
+    setApiError(null);
+    setAudioData(null);
     setIsLoading(true);
 
-    // mimic “real API call” delay for a nicer demo
-    setTimeout(() => {
-      const result = fakeTranslate(inputText, mode);
-      setOutputText(result);
+    if (DEV_MODE) {
+      // Dev mode: use mock translation without calling the backend
+      setTimeout(() => {
+        const result = fakeTranslate(inputText, mode);
+        setOutputText(result);
+        setIsLoading(false);
+      }, 450);
+      return;
+    }
+
+    // Production: call the real backend API
+    try {
+      const response = await fetch(`${API_URL}/llm_output`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: inputText }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.detail || `Server error (${response.status})`);
+      }
+
+      const data = await response.json();
+      setOutputText(data.text);
+      setAudioData(data.audio ?? null);
+    } catch (error) {
+      setApiError(error.message);
+      setOutputText("");
+    } finally {
       setIsLoading(false);
-    }, 450);
+    }
   }
 
   function handleClear() {
     setInputText("");
     setOutputText("");
     setCopied(false);
+    setAudioData(null);
+    setApiError(null);
   }
 
   function handleExample(which) {
@@ -99,6 +135,8 @@ function App() {
       setOutputText("");
     }
     setCopied(false);
+    setAudioData(null);
+    setApiError(null);
   }
 
   async function handleCopy() {
@@ -107,20 +145,32 @@ function App() {
       setCopied(true);
       setTimeout(() => setCopied(false), 1200);
     } catch (e) {
-      // if clipboard fails, do nothing (simple)
+      // clipboard unavailable — silently ignore
     }
   }
 
   function handleReadAloud() {
     if (!outputText) return;
 
-    // Cancel any ongoing speech
+    // Use backend-generated WAV audio when available
+    if (audioData) {
+      const binary = atob(audioData);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: "audio/wav" });
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.play();
+      return;
+    }
+
+    // Fallback: browser speech synthesis (dev mode or no backend audio)
     window.speechSynthesis.cancel();
-
     const utterance = new SpeechSynthesisUtterance(outputText);
-    utterance.rate = 0.9; // slightly slower for clarity
+    utterance.rate = 0.9;
     utterance.pitch = 1.0;
-
     window.speechSynthesis.speak(utterance);
   }
 
@@ -128,6 +178,12 @@ function App() {
 
   return (
     <div className={`page ${isReadingMode ? "reading-mode" : ""}`}>
+      {DEV_MODE && (
+        <div className="devBanner">
+          ⚙️ Dev Mode — mock translation active, backend not called
+        </div>
+      )}
+
       <div className="card">
         <header className="header">
           <div className="headerTop">
@@ -215,6 +271,12 @@ function App() {
               </button>
             </div>
 
+            {apiError && (
+              <div className="apiError" role="alert">
+                ⚠️ {apiError}
+              </div>
+            )}
+
             <div className="hardWords">
               <div className="hardWordsTitle">Detected difficult terms</div>
               {hardWordList.length === 0 ? (
@@ -271,8 +333,9 @@ function App() {
 
         <footer className="footer">
           <div className="footerNote">
-            Tip: This demo uses placeholder translation rules for now. Later you
-            can replace it with a real API call.
+            {DEV_MODE
+              ? "Dev Mode: using mock translation. Set VITE_DEV_MODE=false to call the real backend."
+              : `Connected to backend at ${API_URL}`}
           </div>
         </footer>
       </div>
