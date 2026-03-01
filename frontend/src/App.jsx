@@ -281,7 +281,7 @@ function App() {
                   <button onClick={() => handleTranslate()} disabled={translateDisabled} className="px-6 py-2 bg-legal-navy text-white text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors disabled:opacity-50">
                     {isLoading || isTyping ? "Analyzing..." : "Simplify"}
                   </button>
-                  <button onClick={handleClear} className="px-6 py-2 border border-gray-200 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors">
+                  <button onClick={handleClear} className="px-6 py-2 border border-gray-400 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors">
                     Clear
                   </button>
                 </div>
