@@ -627,3 +627,90 @@ textarea:focus {
   font-size: 12px;
   line-height: 1.5;
 }
+
+/* ── Red Flags section ── */
+.redFlagsSection {
+  margin-top: 20px;
+  padding: 16px 18px;
+  background: #2a1a0e;
+  border: 1px solid #7b3b1a;
+  border-radius: 12px;
+}
+
+.redFlagsTitle {
+  margin: 0 0 14px 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #f4a060;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.redFlagsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.redFlagCard {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border-left: 4px solid;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.redFlagCard.high   { background: #fdecea; border-left-color: #c0392b; }
+.redFlagCard.medium { background: #fef5e7; border-left-color: #e67e22; }
+.redFlagCard.low    { background: #fefde7; border-left-color: #d4ac0d; }
+
+/* header row: badge + quote side by side */
+.redFlagHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.riskBadge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  padding: 3px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.riskBadge.high   { background: #c0392b; color: #fff; }
+.riskBadge.medium { background: #e67e22; color: #fff; }
+.riskBadge.low    { background: #d4ac0d; color: #1a1a1a; }
+
+.redFlagQuote {
+  margin: 0;
+  font-size: 13px;
+  font-style: italic;
+  color: #2c2c2c;
+  line-height: 1.45;
+  border: none;
+  padding: 0;
+}
+
+.redFlagRisk,
+.redFlagWorstCase {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #1a1a1a;
+}
+
+.redFlagWorstCase {
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+/* hide red flags in reading mode */
+.reading-mode .redFlagsSection { display: none; }

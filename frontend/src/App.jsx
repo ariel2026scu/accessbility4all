@@ -18,6 +18,8 @@ function App() {
   const [apiError, setApiError] = useState(null);
   // "idle" | "playing" | "error"
   const [audioStatus, setAudioStatus] = useState("idle");
+  // [{ text: string, risk_level: "high"|"low" }]
+  const [redFlags, setRedFlags] = useState([]);
 
   // typing animation refs
   const typingTimerRef = useRef(null);
@@ -155,10 +157,37 @@ function App() {
     setIsLoading(true);
 
     if (DEV_MODE) {
-      // Dev mode: mock translation 
+      // Dev mode: mock translation + mock red flags (animated)
+
       setTimeout(() => {
         const result = fakeTranslate(inputText, mode);
         startTyping(result);
+        setRedFlags([
+          {
+            quote:      "The Company may modify these terms at any time without prior notice.",
+            risk:       "The company can rewrite your contract unilaterally at any time — new fees, new restrictions, reduced rights — and you have no say.",
+            severity:   "high",
+            worst_case: "Fees double overnight or a key feature is removed. You only find out when you're billed or blocked, and cannot exit without a penalty.",
+          },
+          {
+            quote:      "All disputes shall be resolved through binding arbitration, waiving the right to a jury trial.",
+            risk:       "You give up the right to sue in court. Arbitration is private, typically favours larger companies, and limits your appeal options.",
+            severity:   "high",
+            worst_case: "The company causes you significant financial harm. You cannot join a class action or go to court — you're stuck in a costly arbitration process you're likely to lose.",
+          },
+          {
+            quote:      "Subscription automatically renews unless cancelled 30 days before the renewal date.",
+            risk:       "Easy to miss the cancellation window. You will be charged for another full term even if you stopped using the service.",
+            severity:   "medium",
+            worst_case: "You forget to cancel, get charged for a full year at the new (higher) renewal rate, and the refund policy says all sales are final.",
+          },
+          {
+            quote:      "The user agrees to indemnify and hold harmless the Company against any third-party claims.",
+            risk:       "You could be held financially responsible for legal costs if a third party sues the company over something related to your use.",
+            severity:   "low",
+            worst_case: "A third party sues the company over content you uploaded. The company passes its legal bills to you.",
+          },
+        ]);
         setIsLoading(false);
       }, 450);
       return;
@@ -180,6 +209,7 @@ function App() {
       const data = await response.json();
       startTyping(data.text || "");
       setAudioData(data.audio ?? null);
+      setRedFlags(data.red_flags ?? []);
     } catch (error) {
       setApiError(error.message);
       stopTyping();
@@ -197,6 +227,7 @@ function App() {
     setAudioData(null);
     setApiError(null);
     setAudioStatus("idle");
+    setRedFlags([]);
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     window.speechSynthesis.cancel();
     targetRef.current = "";
@@ -217,6 +248,7 @@ function App() {
     setAudioData(null);
     setApiError(null);
     setAudioStatus("idle");
+    setRedFlags([]);
     targetRef.current = "";
   }
 
@@ -491,6 +523,36 @@ function App() {
             )}
           </section>
         </div>
+
+        {redFlags.length > 0 && (
+          <section className="redFlagsSection">
+            <h3 className="redFlagsTitle">
+              ⚠️ Red Flags Detected ({redFlags.length})
+            </h3>
+            <div className="redFlagsList">
+              {redFlags.map((flag, i) => (
+                <div key={i} className={`redFlagCard ${flag.severity}`}>
+                  <div className="redFlagHeader">
+                    <span className={`riskBadge ${flag.severity}`}>
+                      {flag.severity.toUpperCase()}
+                    </span>
+                    <blockquote className="redFlagQuote">"{flag.quote}"</blockquote>
+                  </div>
+                  {flag.risk && (
+                    <p className="redFlagRisk">
+                      <strong>Hidden risk:</strong> {flag.risk}
+                    </p>
+                  )}
+                  {flag.worst_case && (
+                    <p className="redFlagWorstCase">
+                      <strong>Worst case:</strong> {flag.worst_case}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <footer className="footer">
           <div className="footerNote">
