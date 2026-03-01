@@ -21,7 +21,7 @@ class SimplyLegal_main:
         self.chunker = TextChunker()
 
         # Load configuration from environment variables
-        # self.llm_model = os.getenv("LLM_MODEL", "llama3.2:3b")
+        self.llm_model = os.getenv("LLM_MODEL", "llama3.2:latest")
         self.llm_base_url = os.getenv("LLM_BASE_URL", "http://localhost:11434")
         self.llm_timeout = int(os.getenv("LLM_TIMEOUT", "60"))  # Default 60 seconds
         self.system_prompt = os.getenv(
@@ -34,11 +34,11 @@ class SimplyLegal_main:
         self.is_busy = True
 
         try:
-            logger.info(f"Processing LLM request with model: llama3.2:latest")
+            logger.info(f"Processing LLM request with model: {self.llm_model}")
             system = f"{self.system_prompt}\n:: Prompt: {input_text}"
 
             response = ollama.chat(
-                model="llama3.2:latest",
+                model=self.llm_model,
                 messages=[{"role": "user", "content": system}]
             )
             result = response["message"]["content"]
