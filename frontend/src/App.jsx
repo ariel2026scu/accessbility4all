@@ -662,8 +662,12 @@ function App() {
                 <p className="text-sm uppercase tracking-widest font-bold text-gray-400 mb-4">Upload Document</p>
                 <FileUpload
                   onUploadSuccess={(file) => console.log('Uploaded:', file.name)}
+                  onTextExtracted={handleFileTextExtracted}
+                  apiUrl={API_URL}
+                  devMode={DEV_MODE}
                 />
               </div>
+
 
               {hardWordList.length > 0 && (
                 <div className="pt-4">
