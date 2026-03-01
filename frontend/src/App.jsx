@@ -22,6 +22,9 @@ function App() {
   const debounceRef = useRef(null);
   const targetRef = useRef("");
 
+  // keep a stable reference to the playing Audio so it isn't GC'd mid-playback
+  const audioRef = useRef(null);
+
   const legalExample =
     "Pursuant to the provisions herein, the undersigned hereby agrees to indemnify and hold harmless the Company from any and all claims arising therefrom.";
   const oldEnglishExample =
@@ -220,23 +223,40 @@ function App() {
     }
   }
 
-  function handleReadAloud() {
+  async function handleReadAloud() {
     if (!outputText) return;
 
+    // Stop anything already playing
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    window.speechSynthesis.cancel();
+
     if (audioData) {
-      const binary = atob(audioData);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
+      try {
+        const binary = atob(audioData);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: "audio/wav" });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audioRef.current = audio; // hold reference so it isn't GC'd
+        audio.onended = () => {
+          URL.revokeObjectURL(url);
+          audioRef.current = null;
+        };
+        await audio.play();
+        return;
+      } catch (e) {
+        // Backend audio failed — fall through to speech synthesis
+        console.warn("Audio playback failed, falling back to speech synthesis:", e);
+        audioRef.current = null;
       }
-      const blob = new Blob([bytes], { type: "audio/wav" });
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      audio.play();
-      return;
     }
 
-    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(outputText);
     utterance.rate = 0.9;
     utterance.pitch = 1.0;
@@ -430,7 +450,7 @@ function App() {
                 className="btn btnPrimary"
                 type="button"
                 onClick={handleReadAloud}
-                disabled={outputText.trim().length === 0}
+                disabled={outputText.trim().length === 0 || isTyping}
               >
                 Read Aloud
               </button>
