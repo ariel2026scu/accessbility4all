@@ -7,6 +7,7 @@ import goddessImg from "./assets/legal.png";
 const DEV_MODE = import.meta.env.VITE_DEV_MODE === "true";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 const UPLOAD_CHAR_LIMIT = 5000;
+const MAX_WORDS = 1000;
 
 function truncateAtBoundary(text, limit) {
   if (text.length <= limit) return { text, truncated: false };
@@ -31,6 +32,7 @@ function App() {
   const [audioStatus, setAudioStatus] = useState("idle");
   const [redFlags, setRedFlags] = useState([]);
   const [uploadInfo, setUploadInfo] = useState(null);
+  const [wordLimitHit, setWordLimitHit] = useState(false);
 
   const typingTimerRef = useRef(null);
   const debounceRef = useRef(null);
@@ -49,6 +51,15 @@ function App() {
     }
     return found;
   }, [inputText]);
+
+  const textStats = useMemo(() => {
+    const trimmed = inputText.trim();
+    const words = trimmed ? trimmed.split(/\s+/).length : 0;
+
+    return { words };
+  }, [inputText]);
+
+  const tooManyWords = wordLimitHit || textStats.words > MAX_WORDS;
 
   function fakeTranslate(text, currentMode) {
     let result = text;
@@ -290,17 +301,48 @@ function App() {
               <div className="paper-card p-0 overflow-hidden">
                 <textarea
                   value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const trimmed = value.trim();
+                    const words = trimmed ? trimmed.split(/\s+/).length : 0;
+
+                    if (words <= MAX_WORDS) {
+                      setInputText(value);
+                      setWordLimitHit(false);
+                    } else {
+                      setWordLimitHit(true);
+                    }
+                  }}
                   placeholder="Paste legal text here for simplification..."
                   className="w-full min-h-[300px] p-8 text-lg leading-relaxed focus:outline-none resize-none placeholder:text-gray-300"
                 />
-                <div className="bg-gray-50 p-4 border-t border-gray-100 flex gap-3">
-                  <button onClick={() => handleTranslate()} disabled={translateDisabled} className="px-6 py-2 bg-legal-navy text-white text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors disabled:opacity-50">
-                    {isLoading || isTyping ? "Analyzing..." : "Simplify"}
+                {tooManyWords && (
+                  <div className="px-8 pt-2 text-sm text-red-600">
+                    Please keep the input under {MAX_WORDS.toLocaleString()} words.
+                  </div>
+                )}
+                <div className="bg-gray-50 p-4 border-t border-gray-100 flex items-center gap-3">
+                  <button
+                    onClick={() => handleTranslate()}
+                    disabled={translateDisabled || tooManyWords}
+                    className="px-6 py-2 bg-legal-navy text-white text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors disabled:opacity-50">
+                    {tooManyWords ? "Too long" : isLoading || isTyping ? "Analyzing..." : "Simplify"}
                   </button>
-                  <button onClick={handleClear} className="px-6 py-2 border border-gray-400 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors">
+
+                  <button
+                    onClick={handleClear}
+                    className="px-6 py-2 border border-gray-400 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors">
                     Clear
                   </button>
+
+                  {/* Word & Character Counter */}
+                  <div
+                    className={`ml-auto text-sm tracking-wide ${
+                      tooManyWords ? "text-red-600" : "text-gray-500"
+                    }`}
+                  >
+                    {textStats.words.toLocaleString()} words
+                  </div>
                 </div>
               </div>
 
