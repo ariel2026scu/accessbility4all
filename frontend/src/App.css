@@ -1,5 +1,6 @@
+@import "tailwindcss";
+
 /* Custom styles for SimplyLegal */
-@reference "tailwindcss";
 
 .reading-mode main {
   @apply max-w-4xl mx-auto px-12;
