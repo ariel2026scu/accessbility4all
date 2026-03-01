@@ -14,32 +14,53 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# System prompt — instructs the LLM to return structured JSON with:
+# System prompt — contract risk auditor persona with structured JSON output:
 #   simplified_text  : plain-English translation
-#   red_flags        : list of { text, risk_level: "high"|"low" }
+#   red_flags        : list of { quote, risk, severity, worst_case }
 # ---------------------------------------------------------------------------
 _DEFAULT_SYSTEM_PROMPT = """\
-You are a legal document analyzer. Given the text below, do TWO things:
+You are a contract risk auditor trained to identify hidden, asymmetric, or \
+user-unfriendly clauses.
 
-1. SIMPLIFY: Translate any complex legal jargon or Old English into plain, \
-easy-to-understand modern English.
-2. RED FLAGS: Identify any clauses that are potentially unfair, risky, or one-sided.
+Analyze the following contract text and:
+
+1. Translate any complex legal jargon or Old English into simple, easy-to-understand \
+modern English.
+2. Identify all potential red flags, assuming the reader is an individual user or \
+small business with less bargaining power.
+3. Highlight clauses that:
+   - Limit legal rights
+   - Shift liability
+   - Allow unilateral changes
+   - Cap damages
+   - Remove court access
+   - Broadly license data/IP
+   - Allow termination without notice
+   - Create financial traps (auto-renewal, fees, penalties)
+
+Be conservative: if a clause could reasonably be harmful, mark it.
 
 Respond with ONLY a valid JSON object — no markdown, no explanation, \
 no text outside the JSON:
 
 {
-  "simplified_text": "<plain-English translation>",
+  "simplified_text": "<plain-English translation of the full text>",
   "red_flags": [
-    { "text": "<risky clause, quoted or briefly paraphrased>", "risk_level": "high" },
-    { "text": "<another clause>", "risk_level": "low" }
+    {
+      "quote":      "<exact or near-exact quote of the risky clause>",
+      "risk":       "<plain-English explanation of the hidden risk>",
+      "severity":   "high",
+      "worst_case": "<realistic worst-case scenario for the user>"
+    }
   ]
 }
 
-Risk level rules:
-- "high": severely limits user rights, imposes unlimited liability, allows \
-unilateral changes without notice, waives legal rights, or may be illegal
-- "low": one-sided but common in contracts, or worth reviewing with a lawyer
+Severity levels:
+- "high":   severely limits rights, imposes unlimited liability, waives legal \
+recourse, or may be illegal
+- "medium": meaningfully one-sided, creates significant financial or legal risk \
+if triggered
+- "low":    worth reviewing but common in contracts; low probability of harm
 
 If there are no red flags use: "red_flags": []
 Reply in English only. Output ONLY the JSON object, nothing else.\
@@ -96,30 +117,55 @@ class SimplyLegal_main:
         Extract structured data from the LLM's JSON response.
 
         Returns:
-            { "simplified_text": str, "red_flags": [{ "text": str, "risk_level": "high"|"low" }] }
+            {
+                "simplified_text": str,
+                "red_flags": [
+                    {
+                        "quote":      str,
+                        "risk":       str,
+                        "severity":   "high" | "medium" | "low",
+                        "worst_case": str,
+                    }
+                ]
+            }
 
         Falls back to treating the entire response as simplified_text with no
         red flags if the JSON cannot be parsed.
         """
+        VALID_SEVERITIES = {"high", "medium", "low"}
+
         # Strip markdown code fences the model sometimes adds
         cleaned = re.sub(r"```(?:json)?\s*", "", raw).replace("```", "").strip()
 
         match = re.search(r"\{.*\}", cleaned, re.DOTALL)
         if match:
             try:
-                parsed = json.loads(match.group())
+                parsed    = json.loads(match.group())
                 simplified = str(parsed.get("simplified_text", "")).strip()
                 raw_flags  = parsed.get("red_flags", [])
 
-                # Validate and normalise each flag
                 red_flags = []
                 for f in raw_flags:
-                    if not isinstance(f, dict) or not f.get("text"):
+                    if not isinstance(f, dict):
                         continue
-                    level = f.get("risk_level", "low")
-                    if level not in ("high", "low"):
-                        level = "low"
-                    red_flags.append({"text": str(f["text"]).strip(), "risk_level": level})
+                    # Accept both new schema (quote/risk/severity/worst_case)
+                    # and old schema (text/risk_level) for backward compatibility
+                    quote     = str(f.get("quote") or f.get("text", "")).strip()
+                    risk      = str(f.get("risk", "")).strip()
+                    severity  = f.get("severity") or f.get("risk_level", "low")
+                    worst_case = str(f.get("worst_case", "")).strip()
+
+                    if not quote:
+                        continue
+                    if severity not in VALID_SEVERITIES:
+                        severity = "low"
+
+                    red_flags.append({
+                        "quote":      quote,
+                        "risk":       risk,
+                        "severity":   severity,
+                        "worst_case": worst_case,
+                    })
 
                 if simplified:
                     return {"simplified_text": simplified, "red_flags": red_flags}
