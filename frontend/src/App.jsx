@@ -462,7 +462,7 @@ function App() {
       />
 
       {/* Sidebar/Header */}
-      <aside className="fixed left-0 top-0 h-screen w-full md:w-80 bg-legal-navy text-white p-8 flex flex-col z-30 shadow-2xl">
+      <aside className="fixed left-0 top-0 h-screen w-64 sm:w-80 bg-legal-navy text-white p-8 flex flex-col z-30 shadow-2xl">
         <div className="relative z-10 flex flex-col h-full">
           <div className="mb-auto">
             <div className="mb-8 flex items-center gap-4">
@@ -563,7 +563,7 @@ function App() {
                   filter: "grayscale(10%) contrast(1.3) brightness(0.95)",
                 }}
               />
-      <main className="flex-1 ml-0 md:ml-80 p-6 md:p-12 lg:p-16 max-w-6xl mx-auto w-full overflow-y-auto">
+      <main className="flex-1 ml-64 sm:ml-80 p-6 md:p-12 lg:p-16 max-w-6xl mx-auto w-full overflow-y-auto">
         {DEV_MODE && (
           <div className="mb-8 p-4 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-widest rounded-sm">
             ⚙️ Dev Mode — mock translation active
@@ -733,8 +733,14 @@ function App() {
                   <button
                     onClick={handleDownloadPDF}
                     disabled={!outputText || isTranslatingLang}
-                    className="px-6 py-2 border border-gray-400 text-gray-500 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-2 border border-gray-400 text-gray-500 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors disabled:opacity-50"
                   >
+                    {/* PDF / download icon */}
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                        d="M12 3v10m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+                      />
+                    </svg>
                     Export PDF
                   </button>
                 </div>
