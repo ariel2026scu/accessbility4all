@@ -1,4 +1,5 @@
 import os
+import re
 from dotenv import load_dotenv
 import logging
 
@@ -29,6 +30,10 @@ class SimplyLegal_main:
             "You are translation app, translating complex legal jargon into simple, easy-to-understand language. Be concise."
         )
 
+    def _strip_think_tags(self, text: str) -> str:
+        """Strip <think>…</think> reasoning blocks emitted by DeepSeek-R1 and similar models."""
+        return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+
     def ask_ai(self, input_text: str) -> str:
         """Translate text using LLM"""
         self.is_busy = True
@@ -41,7 +46,7 @@ class SimplyLegal_main:
                 model=self.llm_model,
                 messages=[{"role": "user", "content": system}]
             )
-            result = response["message"]["content"]
+            result = self._strip_think_tags(response["message"]["content"])
             logger.info("LLM request completed successfully")
             return result
 

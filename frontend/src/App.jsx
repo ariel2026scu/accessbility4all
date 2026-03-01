@@ -16,6 +16,8 @@ function App() {
   const [isReadingMode, setIsReadingMode] = useState(false);
   const [audioData, setAudioData] = useState(null);
   const [apiError, setApiError] = useState(null);
+  // "idle" | "playing" | "error"
+  const [audioStatus, setAudioStatus] = useState("idle");
 
   // typing animation refs
   const typingTimerRef = useRef(null);
@@ -141,6 +143,7 @@ function App() {
     setCopied(false);
     setApiError(null);
     setAudioData(null);
+    setAudioStatus("idle");
 
     // don’t translate empty
     if (inputText.trim().length === 0) {
@@ -193,6 +196,9 @@ function App() {
     setCopied(false);
     setAudioData(null);
     setApiError(null);
+    setAudioStatus("idle");
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    window.speechSynthesis.cancel();
     targetRef.current = "";
   }
 
@@ -210,6 +216,7 @@ function App() {
     setCopied(false);
     setAudioData(null);
     setApiError(null);
+    setAudioStatus("idle");
     targetRef.current = "";
   }
 
@@ -232,6 +239,7 @@ function App() {
       audioRef.current = null;
     }
     window.speechSynthesis.cancel();
+    setAudioStatus("playing");
 
     if (audioData) {
       try {
@@ -243,24 +251,37 @@ function App() {
         const blob = new Blob([bytes], { type: "audio/wav" });
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
-        audioRef.current = audio; // hold reference so it isn't GC'd
+        audioRef.current = audio;
         audio.onended = () => {
           URL.revokeObjectURL(url);
           audioRef.current = null;
+          setAudioStatus("idle");
+        };
+        audio.onerror = () => {
+          URL.revokeObjectURL(url);
+          audioRef.current = null;
+          setAudioStatus("error");
         };
         await audio.play();
         return;
       } catch (e) {
-        // Backend audio failed — fall through to speech synthesis
-        console.warn("Audio playback failed, falling back to speech synthesis:", e);
+        console.warn("Backend audio failed, falling back to speech synthesis:", e);
         audioRef.current = null;
+        // fall through to speech synthesis
       }
     }
 
-    const utterance = new SpeechSynthesisUtterance(outputText);
-    utterance.rate = 0.9;
-    utterance.pitch = 1.0;
-    window.speechSynthesis.speak(utterance);
+    // Fallback: browser speech synthesis
+    try {
+      const utterance = new SpeechSynthesisUtterance(outputText);
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      utterance.onend = () => setAudioStatus("idle");
+      utterance.onerror = () => setAudioStatus("error");
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      setAudioStatus("error");
+    }
   }
 
   // DEV_MODE: auto-translate while typing (debounced) like your “second” version
@@ -450,9 +471,9 @@ function App() {
                 className="btn btnPrimary"
                 type="button"
                 onClick={handleReadAloud}
-                disabled={outputText.trim().length === 0 || isTyping}
+                disabled={outputText.trim().length === 0 || isTyping || audioStatus === "playing"}
               >
-                Read Aloud
+                {audioStatus === "playing" ? "Playing…" : "Read Aloud"}
               </button>
 
               <button
@@ -464,6 +485,12 @@ function App() {
                 {copied ? "Copied!" : "Copy"}
               </button>
             </div>
+
+            {audioStatus === "error" && (
+              <div className="audioError" role="alert">
+                ⚠️ Audio playback failed. Check your browser allows audio, or try a different browser.
+              </div>
+            )}
           </section>
         </div>
 
