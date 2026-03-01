@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import jsPDF from "jspdf";
 import "./App.css";
 import FileUpload from "./FileUpload";
 import logoImg from "./assets/scu-logo.png";
@@ -139,6 +140,119 @@ function App() {
       }, 12);
       return currentShown;
     });
+  }
+
+  function handleDownloadPDF() {
+    const doc = new jsPDF({ unit: "pt", format: "letter" });
+
+    const margin = 60;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const maxLineWidth = pageWidth - margin * 2;
+    let y = margin;
+
+    // ── Header ──
+    doc.setFont("times", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(10, 30, 70);
+    doc.text("SimplyLegal — Plain Interpretation", margin, y);
+    y += 28;
+
+    // Thin gold divider line
+    doc.setDrawColor(180, 140, 60);
+    doc.setLineWidth(1);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 20;
+
+    // Date
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, margin, y);
+    if (uiLang !== "en") {
+      doc.text(`Language: ${currentLangLabel}`, pageWidth - margin, y, { align: "right" });
+    }
+    y += 24;
+
+    // ── Simplified text ──
+    doc.setFont("times", "normal");
+    doc.setFontSize(12);
+    doc.setTextColor(30, 30, 30);
+
+    const lines = doc.splitTextToSize(outputText, maxLineWidth);
+    for (const line of lines) {
+      if (y + 18 > pageHeight - margin) { doc.addPage(); y = margin; }
+      doc.text(line, margin, y);
+      y += 18;
+    }
+
+    // ── Red Flags ──
+    if (redFlags.length > 0) {
+      y += 20;
+      if (y + 40 > pageHeight - margin) { doc.addPage(); y = margin; }
+
+      doc.setDrawColor(180, 140, 60);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 20;
+
+      doc.setFont("times", "bold");
+      doc.setFontSize(15);
+      doc.setTextColor(10, 30, 70);
+      doc.text(`Due Diligence Alerts (${redFlags.length})`, margin, y);
+      y += 24;
+
+      redFlags.forEach((flag, i) => {
+        if (y + 80 > pageHeight - margin) { doc.addPage(); y = margin; }
+
+        const severityColor = flag.severity === "high" ? [180, 30, 30] : flag.severity === "medium" ? [180, 100, 20] : [60, 120, 60];
+
+        doc.setFont("times", "italic");
+        doc.setFontSize(10);
+        doc.setTextColor(90, 90, 90);
+        const quoteLines = doc.splitTextToSize(`"${flag.quote}"`, maxLineWidth - 16);
+        for (const line of quoteLines) {
+          if (y + 14 > pageHeight - margin) { doc.addPage(); y = margin; }
+          doc.text(line, margin + 16, y);
+          y += 14;
+        }
+        y += 4;
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.setTextColor(30, 30, 30);
+        const riskLines = doc.splitTextToSize(flag.risk, maxLineWidth);
+        for (const line of riskLines) {
+          if (y + 14 > pageHeight - margin) { doc.addPage(); y = margin; }
+          doc.text(line, margin, y);
+          y += 14;
+        }
+        y += 4;
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(140, 50, 50);
+        const wcLines = doc.splitTextToSize(`Exposure: ${flag.worst_case}`, maxLineWidth);
+        for (const line of wcLines) {
+          if (y + 13 > pageHeight - margin) { doc.addPage(); y = margin; }
+          doc.text(line, margin, y);
+          y += 13;
+        }
+        y += 16;
+      });
+    }
+
+    // ── Footer on every page ──
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+      doc.setPage(p);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(160, 160, 160);
+      doc.text("SimplyLegal — SCU Digital Counsel", margin, pageHeight - 30);
+      doc.text(`Page ${p} of ${totalPages}`, pageWidth - margin, pageHeight - 30, { align: "right" });
+    }
+
+    doc.save("SimplyLegal-Analysis.pdf");
   }
 
   async function handleTranslate(overrideText) {
@@ -612,6 +726,13 @@ function App() {
                         d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5h8v4H8z"/>
                     </svg>
                     {copied ? "Copied" : "Copy"}
+                  </button>
+                  <button
+                    onClick={handleDownloadPDF}
+                    disabled={!outputText || isTranslatingLang}
+                    className="px-6 py-2 border border-gray-400 text-gray-500 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors disabled:opacity-50"
+                  >
+                    Export PDF
                   </button>
                 </div>
               </div>

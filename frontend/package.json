@@ -13,6 +13,7 @@
     "@google/model-viewer": "^4.1.0",
     "@webspatial/core-sdk": "^1.2.0",
     "@webspatial/react-sdk": "^1.2.0",
+    "jspdf": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.2.1",
