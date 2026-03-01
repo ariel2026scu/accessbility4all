@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import logging
 
 import ollama
+from groq import Groq
 import pyttsx3
 import tempfile
 from services.text_chunker import TextChunker
@@ -21,43 +22,62 @@ class SimplyLegal_main:
         self.is_busy = False
         self.chunker = TextChunker()
 
-        # Load configuration from environment variables
-        self.llm_model = os.getenv("LLM_MODEL", "llama3.2:latest")
-        self.llm_base_url = os.getenv("LLM_BASE_URL", "http://localhost:11434")
-        self.llm_timeout = int(os.getenv("LLM_TIMEOUT", "60"))  # Default 60 seconds
         self.system_prompt = os.getenv(
             "TRANSLATION_SYSTEM_PROMPT",
-            "You are translation app, translating complex legal jargon into simple, easy-to-understand language. Be concise."
+            "You are a translation app. Translate complex legal jargon or Old English into simple, easy-to-understand modern English. Be concise. Reply in English only."
         )
+
+        # Groq takes priority when an API key is configured
+        groq_key = os.getenv("GROQ_API_KEY")
+        if groq_key:
+            self.provider = "groq"
+            self.groq_client = Groq(api_key=groq_key)
+            self.groq_model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+            logger.info(f"LLM provider: Groq ({self.groq_model})")
+        else:
+            self.provider = "ollama"
+            self.ollama_model = os.getenv("LLM_MODEL", "llama3.2:latest")
+            self.llm_timeout = int(os.getenv("LLM_TIMEOUT", "60"))
+            logger.info(f"LLM provider: Ollama ({self.ollama_model})")
 
     def _strip_think_tags(self, text: str) -> str:
         """Strip <think>…</think> reasoning blocks emitted by DeepSeek-R1 and similar models."""
         return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
 
-    def ask_ai(self, input_text: str) -> str:
-        """Translate text using LLM"""
-        self.is_busy = True
+    def _ask_groq(self, system: str) -> str:
+        response = self.groq_client.chat.completions.create(
+            model=self.groq_model,
+            messages=[{"role": "user", "content": system}],
+        )
+        return response.choices[0].message.content
 
+    def _ask_ollama(self, system: str) -> str:
+        response = ollama.chat(
+            model=self.ollama_model,
+            messages=[{"role": "user", "content": system}],
+        )
+        return response["message"]["content"]
+
+    def ask_ai(self, input_text: str) -> str:
+        """Translate text using the configured LLM provider."""
+        self.is_busy = True
         try:
-            logger.info(f"Processing LLM request with model: {self.llm_model}")
+            logger.info(f"Sending request via {self.provider}")
             system = f"{self.system_prompt}\n:: Prompt: {input_text}"
 
-            response = ollama.chat(
-                model=self.llm_model,
-                messages=[{"role": "user", "content": system}]
-            )
-            result = self._strip_think_tags(response["message"]["content"])
+            raw = self._ask_groq(system) if self.provider == "groq" else self._ask_ollama(system)
+            result = self._strip_think_tags(raw)
             logger.info("LLM request completed successfully")
             return result
 
         except TimeoutError as e:
-            logger.error(f"LLM request timeout: {e}")
+            logger.error(f"LLM timeout: {e}")
             raise Exception("LLM service timed out. Please try again.")
         except ConnectionError as e:
             logger.error(f"LLM connection error: {e}")
             raise Exception("Unable to connect to LLM service. Please check the service is running.")
         except Exception as e:
-            logger.error(f"Unexpected error in LLM processing: {e}")
+            logger.error(f"Unexpected LLM error: {e}")
             raise Exception(f"Error processing text: {str(e)}")
         finally:
             self.is_busy = False
