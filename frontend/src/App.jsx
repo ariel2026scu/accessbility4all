@@ -416,7 +416,6 @@ function App() {
   }, [inputText, mode]);
 
   useEffect(() => {
-    if (uiLang === "en") return;
     if (!inputText.trim()) return;
 
     if (inputDebounceRef.current) clearTimeout(inputDebounceRef.current);
