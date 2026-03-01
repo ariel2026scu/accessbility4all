@@ -349,6 +349,7 @@ function App() {
     isLoading || isTyping || inputText.trim().length === 0;
 
   return (
+<<<<<<< Updated upstream
     <div className={`page ${isReadingMode ? "reading-mode" : ""}`}>
       {DEV_MODE && (
         <div className="devBanner">
@@ -431,6 +432,42 @@ function App() {
                 type="button"
                 onClick={handleTranslate}
                 disabled={translateDisabled}
+=======
+    <div className={`min-h-screen flex flex-col md:flex-row bg-legal-offwhite font-sans text-legal-charcoal relative overflow-hidden ${isReadingMode ? "reading-mode" : ""}`}>
+      {/* Sidebar/Header */}
+      <aside className="relative w-full md:w-80 bg-legal-navy text-white p-8 flex flex-col shrink-0 z-10 overflow-hidden">
+        {/* Background Goddess Image for Sidebar */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-64 pointer-events-none opacity-10 z-0"
+          style={{ 
+            backgroundImage: `url(${goddessImg})`,
+            backgroundSize: 'contain',
+            backgroundPosition: 'bottom center',
+            backgroundRepeat: 'no-repeat',
+            mixBlendMode: 'soft-light'
+          }}
+        />
+
+        <div className="relative z-10 flex flex-col h-full">
+          <div className="mb-auto">
+            <div className="mb-8 flex items-center gap-4">
+              <div className="bg-white p-1 rounded-sm">
+                <img src={logoImg} alt="SCU Logo" className="w-12 h-12 object-contain" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-serif text-legal-gold tracking-tight leading-tight">SimplyLegal</h1>
+                <p className="text-[10px] text-blue-200/40 uppercase tracking-[0.2em] font-bold">SCU Digital Counsel</p>
+              </div>
+            </div>
+            
+            <nav className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-blue-300/50 font-bold block">Translation Mode</label>
+              <select 
+                value={mode} 
+                onChange={(e) => setMode(e.target.value)}
+                className="w-full bg-blue-900/30 border border-blue-800 rounded-sm p-3 text-sm focus:outline-none focus:border-legal-gold transition-colors"
+>>>>>>> Stashed changes
               >
                 {isLoading || isTyping ? "Translating..." : "Explain"}
               </button>
@@ -443,10 +480,54 @@ function App() {
                 Clear
               </button>
             </div>
+<<<<<<< Updated upstream
 
             {apiError && (
               <div className="apiError" role="alert">
                 ⚠️ {apiError}
+=======
+          </nav>
+        </div>
+<div className="pt-8 mt-auto border-t border-blue-900/50 relative z-10">
+  <button 
+    onClick={() => setIsReadingMode(!isReadingMode)}
+    className={`w-full p-3 rounded-sm border text-xs font-bold tracking-widest uppercase transition-all ${isReadingMode ? 'bg-legal-gold text-legal-navy border-legal-gold' : 'border-blue-800 text-blue-300 hover:border-legal-gold hover:text-legal-gold'}`}
+  >
+    {isReadingMode ? "Focus Mode: ON" : "Focus Mode: OFF"}
+  </button>
+</div>
+</div>
+</aside>
+
+
+      {/* Main Content */}
+      <main className="flex-1 p-6 md:p-12 lg:p-16 max-w-6xl mx-auto w-full overflow-y-auto">
+        <div className="space-y-12">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            {/* Input Section */}
+            <section className="space-y-6">
+              <div className="flex items-end justify-between border-b border-gray-200 pb-4">
+                <h2 className="text-2xl font-serif text-legal-navy">Original Clause</h2>
+                <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400">Section A-1</span>
+              </div>
+              
+              <div className="paper-card p-0 overflow-hidden">
+                <textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Paste legal text here for simplification..."
+                  className="w-full min-h-[300px] p-8 text-lg leading-relaxed focus:outline-none resize-none placeholder:text-gray-300"
+                />
+                <div className="bg-gray-50 p-4 border-t border-gray-100 flex gap-3">
+                  <button onClick={handleTranslate} disabled={translateDisabled} className="px-6 py-2 bg-legal-navy text-white text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors disabled:opacity-50">
+                    {isLoading || isTyping ? "Analyzing..." : "Simplify"}
+                  </button>
+                  <button onClick={handleClear} className="px-6 py-2 border border-gray-200 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors">
+                    Clear
+                  </button>
+                </div>
+>>>>>>> Stashed changes
               </div>
             )}
 
