@@ -449,15 +449,15 @@ function App() {
     <div className={`min-h-screen flex flex-col md:flex-row bg-legal-offwhite font-sans text-legal-charcoal relative overflow-hidden ${isReadingMode ? "reading-mode" : ""}`}>
       {/* Background Watermark Goddess Image (Seamless Right Side) */}
       <div 
-        className="fixed bottom-0 right-0 md:left-80 left-0 h-screen pointer-events-none opacity-[0.04] z-0 select-none overflow-hidden"
+        className="fixed bottom-0 right-0 md:left-80 left-0 h-screen pointer-events-none opacity-[0.06] z-0 select-none overflow-hidden"
         style={{ 
           backgroundImage: `url(${goddessImg})`,
           backgroundSize: 'contain',
           backgroundPosition: 'bottom right',
           backgroundRepeat: 'no-repeat',
-          filter: 'grayscale(100%)',
-          WebkitMaskImage: 'radial-gradient(circle at bottom right, black 20%, transparent 80%)',
-          maskImage: 'radial-gradient(circle at bottom right, black 20%, transparent 80%)'
+          filter: 'grayscale(100%) brightness(1.1)',
+          WebkitMaskImage: 'linear-gradient(to top left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 70%)',
+          maskImage: 'linear-gradient(to top left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 70%)'
         }}
       />
 
