@@ -734,8 +734,14 @@ function App() {
                   <button
                     onClick={handleDownloadPDF}
                     disabled={!outputText || isTranslatingLang}
-                    className="px-6 py-2 border border-gray-400 text-gray-500 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-2 border border-gray-400 text-gray-500 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors disabled:opacity-50"
                   >
+                    {/* PDF / download icon */}
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                        d="M12 3v10m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+                      />
+                    </svg>
                     Export PDF
                   </button>
                 </div>
