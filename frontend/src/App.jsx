@@ -38,6 +38,7 @@ function App() {
   const debounceRef = useRef(null);
   const targetRef = useRef("");
   const audioRef = useRef(null);
+  const alertsRef = useRef(null);
 
   const legalExample = "Pursuant to the provisions herein, the undersigned hereby agrees to indemnify and hold harmless the Company from any and all claims arising therefrom.";
   const oldEnglishExample = "Thou art wise, and I beseech thee to lend me thine counsel, for I know not what I should do.";
@@ -139,6 +140,12 @@ function App() {
     targetRef.current = "";
   }
 
+  function handleScrollToAlerts() {
+    if (alertsRef.current) {
+      alertsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
   function handleFileTextExtracted(rawText, meta) {
     const { text, truncated } = truncateAtBoundary(rawText, UPLOAD_CHAR_LIMIT);
     setInputText(text);
@@ -213,7 +220,7 @@ function App() {
       />
 
       {/* Sidebar/Header */}
-      <aside className="relative w-full md:w-80 bg-legal-navy text-white p-8 flex flex-col shrink-0 z-10 overflow-hidden shadow-2xl">
+      <aside className="fixed left-0 top-0 h-screen w-full md:w-80 bg-legal-navy text-white p-8 flex flex-col z-30 shadow-2xl">
         <div className="relative z-10 flex flex-col h-full">
           <div className="mb-auto">
             <div className="mb-8 flex items-center gap-4">
@@ -281,7 +288,7 @@ function App() {
                   filter: "grayscale(10%) contrast(1.3) brightness(0.95)",
                 }}
               />
-      <main className="flex-1 p-6 md:p-12 lg:p-16 max-w-6xl mx-auto w-full overflow-y-auto">
+      <main className="flex-1 ml-0 md:ml-80 p-6 md:p-12 lg:p-16 max-w-6xl mx-auto w-full overflow-y-auto">
         {DEV_MODE && (
           <div className="mb-8 p-4 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-widest rounded-sm">
             ⚙️ Dev Mode — mock translation active
@@ -383,38 +390,67 @@ function App() {
                 <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400">Revision 1.0</span>
               </div>
 
-              <div className="paper-card p-8 min-h-[300px] max-h-[60vh] overflow-y-auto relative">
-                {isLoading ? (
-                  <div className="space-y-4">
-                    <div className="h-4 bg-gray-100 animate-pulse w-full"></div>
-                    <div className="h-4 bg-gray-100 animate-pulse w-5/6"></div>
-                    <div className="h-4 bg-gray-100 animate-pulse w-full"></div>
-                    <div className="h-4 bg-gray-100 animate-pulse w-2/3"></div>
-                  </div>
-                ) : outputText ? (
-                  <div className="text-lg leading-[1.8] text-legal-charcoal whitespace-pre-wrap pb-16">
-                    {outputText}
-                    {isTyping && <span className="inline-block w-1.5 h-5 bg-legal-gold ml-1 animate-pulse"></span>}
-                  </div>
-                ) : (
-                  <p className="text-gray-300 italic text-lg">Analysis will appear here...</p>
-                )}
+              <div className="paper-card p-0 overflow-hidden">
+                {/* Scrollable text area */}
+                <div className="p-8 min-h-[300px] max-h-[60vh] overflow-y-auto">
+                  {isLoading ? (
+                    <div className="space-y-4">
+                      <div className="h-4 bg-gray-100 animate-pulse w-full"></div>
+                      <div className="h-4 bg-gray-100 animate-pulse w-5/6"></div>
+                      <div className="h-4 bg-gray-100 animate-pulse w-full"></div>
+                      <div className="h-4 bg-gray-100 animate-pulse w-2/3"></div>
+                    </div>
+                  ) : outputText ? (
+                    <div className="text-lg leading-[1.8] text-legal-charcoal whitespace-pre-wrap">
+                      {outputText}
+                      {isTyping && <span className="inline-block w-1.5 h-5 bg-legal-gold ml-1 animate-pulse"></span>}
+                    </div>
+                  ) : (
+                    <p className="text-gray-300 italic text-lg">Analysis will appear here...</p>
+                  )}
+                </div>
 
-                <div className="absolute bottom-6 right-8 flex gap-4">
-                  <button onClick={handleReadAloud} disabled={!outputText} className="text-legal-gold hover:text-legal-navy transition-colors">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                {/* Footer bar (like Simplify/Clear) */}
+                <div className="bg-gray-50 p-4 border-t border-gray-100 flex items-center gap-3">
+                  <button
+                    onClick={handleReadAloud}
+                    disabled={!outputText}
+                    className="px-6 py-2 border border-legal-gold text-legal-gold text-xs font-bold uppercase tracking-widest hover:bg-legal-gold hover:text-legal-navy transition-colors disabled:opacity-50"
+                  >
+                    Read
                   </button>
-                  <button onClick={handleCopy} disabled={!outputText} className="text-legal-gold hover:text-legal-navy transition-colors">
-                    {copied ? "✓" : <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>}
+
+                  <button
+                    onClick={handleCopy}
+                    disabled={!outputText}
+                    className="px-6 py-2 border border-gray-400 text-gray-500 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors disabled:opacity-50"
+                  >
+                    {copied ? "Copied" : "Copy"}
                   </button>
                 </div>
               </div>
+
+              {/* Down arrow hint: jump to Due Diligence Alerts */}
+              {outputText && redFlags.length > 0 && (
+                <div className="flex justify-center pt-10">
+                  <button
+                    onClick={handleScrollToAlerts}
+                    className="bg-gray-200 text-gray-700 w-14 h-14 rounded-full shadow-md flex items-center justify-center hover:bg-gray-300 hover:scale-105 transition-all duration-200"
+                    title="Jump to Due Diligence Alerts"
+                    aria-label="Jump to Due Diligence Alerts"
+                  >
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
             </section>
           </div>
 
           {/* Red Flags Section */}
           {redFlags.length > 0 && (
-            <section className="space-y-8 pt-12">
+            <section ref={alertsRef} id="due-diligence-alerts" className="space-y-8 pt-12">
               <div className="flex items-center gap-4">
                 <h3 className="text-2xl font-serif text-legal-navy underline decoration-legal-gold underline-offset-8 decoration-2">Due Diligence Alerts</h3>
                 <span className="px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-black uppercase tracking-tighter rounded-full">{redFlags.length} FOUND</span>
