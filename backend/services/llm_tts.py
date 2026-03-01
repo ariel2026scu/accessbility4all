@@ -70,7 +70,6 @@ Reply in English only. Output ONLY the JSON object, nothing else.\
 class SimplyLegal_main:
 
     def __init__(self):
-        self.engine = pyttsx3.init()
         self.is_busy = False
         self.chunker = TextChunker()
 
@@ -216,8 +215,10 @@ class SimplyLegal_main:
         temp_file.close()
         try:
             logger.info("Generating audio from text")
-            self.engine.save_to_file(text, temp_file.name)
-            self.engine.runAndWait()
+            engine = pyttsx3.init()          # fresh instance every call
+            engine.save_to_file(text, temp_file.name)
+            engine.runAndWait()
+            engine.stop()                    # cleanly tear down the event loop
             with open(temp_file.name, "rb") as f:
                 audio_bytes = f.read()
             logger.info(f"Audio generated successfully ({len(audio_bytes)} bytes)")

@@ -206,9 +206,13 @@ function App() {
         <div className="relative z-10 flex flex-col h-full">
           <div className="mb-auto">
             <div className="mb-8 flex items-center gap-4">
+<<<<<<< HEAD
               <div className="bg-white rounded-full overflow-hidden border-2 border-legal-gold/50 shadow-inner p-0">
                 <img src={logoImg} alt="SCU Logo" className="w-14 h-14 object-cover" />
               </div>
+=======
+              <img src={logoImg} alt="SCU Logo" className="w-25 h-25 object-contain" />
+>>>>>>> caaeb8299bc476cea1c020cd2a4c155c4b4fa219
               <div>
                 <h1 className="text-2xl font-serif text-legal-gold tracking-tight leading-tight">SimplyLegal</h1>
                 <p className="text-[10px] text-blue-200/40 uppercase tracking-[0.2em] font-bold">SCU Digital Counsel</p>
