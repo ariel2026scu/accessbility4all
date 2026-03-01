@@ -267,7 +267,7 @@ function App() {
                   className="w-full min-h-[300px] p-8 text-lg leading-relaxed focus:outline-none resize-none placeholder:text-gray-300"
                 />
                 <div className="bg-gray-50 p-4 border-t border-gray-100 flex gap-3">
-                  <button onClick={handleTranslate} disabled={translateDisabled} className="px-6 py-2 bg-legal-navy text-white text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors disabled:opacity-50">
+                  <button onClick={() => handleTranslate()} disabled={translateDisabled} className="px-6 py-2 bg-legal-navy text-white text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors disabled:opacity-50">
                     {isLoading || isTyping ? "Analyzing..." : "Simplify"}
                   </button>
                   <button onClick={handleClear} className="px-6 py-2 border border-gray-200 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors">
