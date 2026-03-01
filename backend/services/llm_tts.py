@@ -16,6 +16,19 @@ class SimplyLegal_main:
         
         self.is_busy = True
 
+        system = (
+            "You are translation app, translating complex legal jargon into simple, easy-to-understand language. "
+            "Be concise."
+            f":: Prompt: {input}"
+        )
+
+        response = ollama.chat(model="deepseek-r1:8b", messages=[
+            {"role": "user", "content": system}
+        ])
+        return response["message"]["content"]
+
+    def _run_tts(self, text):
+
         try:
             system = (
                 "You are translation app, translating complex legal jargon into simple, easy-to-understand language. "
