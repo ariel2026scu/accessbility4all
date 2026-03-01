@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import "./App.css";
 import FileUpload from "./FileUpload";
 import logoImg from "./assets/scu-logo.png";
@@ -6,8 +6,25 @@ import goddessImg from "./assets/legal.png";
 
 const DEV_MODE = import.meta.env.VITE_DEV_MODE === "true";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const VITE_GOOGLE_TRANSLATE_KEY = import.meta.env.VITE_GOOGLE_TRANSLATE_KEY;
+const GOOGLE_API_URL = import.meta.env.GOOGLE_API_URL || "https://translation.googleapis.com/language/translate/v2";
 const UPLOAD_CHAR_LIMIT = 5000;
 const MAX_WORDS = 1000;
+
+const LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "es", label: "Español" },
+  { code: "fr", label: "Français" },
+  { code: "de", label: "Deutsch" },
+  { code: "zh", label: "中文" },
+  { code: "ja", label: "日本語" },
+  { code: "ko", label: "한국어" },
+  { code: "pt", label: "Português" },
+  { code: "ar", label: "العربية" },
+  { code: "hi", label: "हिन्दी" },
+  { code: "it", label: "Italiano" },
+  { code: "ru", label: "Русский" },
+];
 
 function truncateAtBoundary(text, limit) {
   if (text.length <= limit) return { text, truncated: false };
@@ -17,6 +34,27 @@ function truncateAtBoundary(text, limit) {
   const lastSentence = slice.lastIndexOf(". ");
   if (lastSentence > limit * 0.7) return { text: slice.slice(0, lastSentence + 1).trim(), truncated: true };
   return { text: slice.trim() + "…", truncated: true };
+}
+
+async function googleTranslate(text, targetLang) {
+  if (!text || !text.trim() || targetLang === "en") return text;
+  if (!VITE_GOOGLE_TRANSLATE_KEY) {
+    console.warn("VITE_GOOGLE_TRANSLATE_KEY not set — skipping translation");
+    return text;
+  }
+  try {
+    const res = await fetch(`${GOOGLE_API_URL}?key=${VITE_GOOGLE_TRANSLATE_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ q: text, target: targetLang, format: "text" }),
+    });
+    if (!res.ok) throw new Error(`Google Translate error ${res.status}`);
+    const data = await res.json();
+    return data?.data?.translations?.[0]?.translatedText ?? text;
+  } catch (e) {
+    console.error("Translation failed:", e);
+    return text;
+  }
 }
 
 function App() {
@@ -33,6 +71,9 @@ function App() {
   const [redFlags, setRedFlags] = useState([]);
   const [uploadInfo, setUploadInfo] = useState(null);
   const [wordLimitHit, setWordLimitHit] = useState(false);
+
+  const [uiLang, setUiLang] = useState("en");
+  const [isTranslatingLang, setIsTranslatingLang] = useState(false);
 
   const typingTimerRef = useRef(null);
   const debounceRef = useRef(null);
@@ -100,6 +141,8 @@ function App() {
 
   async function handleTranslate(overrideText) {
     setCopied(false); setApiError(null); setAudioData(null); setAudioStatus("idle");
+    targetRef.current = "";
+    setOutputText("");
     const text = (overrideText !== undefined ? overrideText : inputText).trim();
     if (text.length === 0) { stopTyping(); setOutputText(""); return; }
     setIsLoading(true);
@@ -125,13 +168,68 @@ function App() {
       });
       if (!response.ok) throw new Error(`Server error (${response.status})`);
       const data = await response.json();
-      startTyping(data.text || "");
+      let translatedText = data.text || "";
+      let translatedFlags = data.red_flags ?? [];
+
+      if (uiLang !== "en") {
+        setIsTranslatingLang(true);
+        try {
+          translatedText = await googleTranslate(translatedText, uiLang);
+          translatedFlags = await Promise.all(translatedFlags.map(async (f) => ({
+            ...f,
+            quote: await googleTranslate(f.quote, uiLang),
+            risk: await googleTranslate(f.risk, uiLang),
+            worst_case: await googleTranslate(f.worst_case, uiLang),
+          })));
+        } finally {
+          setIsTranslatingLang(false);
+        }
+      }
+
+      startTyping(translatedText);
       setAudioData(data.audio ?? null);
-      setRedFlags(data.red_flags ?? []);
+      setRedFlags(translatedFlags);
     } catch (error) {
       setApiError(error.message); stopTyping(); setOutputText("");
     } finally { setIsLoading(false); }
   }
+
+  const handleLanguageChange = useCallback(async (newLang) => {
+    if (newLang === uiLang) return;
+    setUiLang(newLang);
+
+    const hasInput = inputText.trim().length > 0;
+    const hasOutput = outputText.trim().length > 0;
+    if (!hasInput && !hasOutput) return;
+
+    setIsTranslatingLang(true);
+    try {
+      const [translatedInput, translatedOutput] = await Promise.all([
+        hasInput ? googleTranslate(inputText, newLang) : Promise.resolve(inputText),
+        hasOutput ? googleTranslate(outputText, newLang) : Promise.resolve(outputText),
+      ]);
+
+      if (hasInput) setInputText(translatedInput);
+
+      if (hasOutput) {
+        stopTyping();
+        targetRef.current = translatedOutput;
+        setOutputText(translatedOutput);
+      }
+
+      if (redFlags.length > 0) {
+        const translatedFlags = await Promise.all(redFlags.map(async (f) => ({
+          ...f,
+          quote: await googleTranslate(f.quote, newLang),
+          risk: await googleTranslate(f.risk, newLang),
+          worst_case: await googleTranslate(f.worst_case, newLang),
+        })));
+        setRedFlags(translatedFlags);
+      }
+    } finally {
+      setIsTranslatingLang(false);
+    }
+  }, [uiLang, inputText, outputText, redFlags]);
 
   function handleClear() {
     setInputText(""); stopTyping(); setOutputText(""); setCopied(false); setAudioData(null); setApiError(null); setAudioStatus("idle"); setRedFlags([]); setUploadInfo(null);
@@ -202,6 +300,7 @@ function App() {
   }, [inputText, mode]);
 
   const translateDisabled = isLoading || isTyping || inputText.trim().length === 0;
+  const currentLangLabel = LANGUAGES.find(l => l.code === uiLang)?.label ?? "English";
 
   return (
     <div className={`min-h-screen flex flex-col md:flex-row bg-legal-offwhite font-sans text-legal-charcoal relative overflow-hidden ${isReadingMode ? "reading-mode" : ""}`}>
@@ -244,6 +343,40 @@ function App() {
                   <option value="legal">Legalese → Plain English</option>
                   <option value="oldEnglish">Old English → Modern English</option>
                 </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-blue-300/50 font-bold block flex items-center gap-2">
+                  Output Language
+                  {isTranslatingLang && (
+                    <span className="inline-block w-3 h-3 border-2 border-legal-gold border-t-transparent rounded-full animate-spin" />
+                  )}
+                </label>
+                <div className="relative">
+                  <select
+                    value={uiLang}
+                    onChange={(e) => handleLanguageChange(e.target.value)}
+                    disabled={isTranslatingLang}
+                    className="w-full bg-blue-900/30 border border-blue-800 rounded-sm p-3 text-sm focus:outline-none focus:border-legal-gold transition-colors appearance-none pr-8 disabled:opacity-50"
+                  >
+                    {LANGUAGES.map((lang) => (
+                      <option key={lang.code} value={lang.code}>
+                        {lang.label}
+                      </option>
+                    ))}
+                  </select>
+                  {/* Chevron icon */}
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                    <svg className="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+                {uiLang !== "en" && (
+                  <p className="text-[10px] text-blue-300/40 leading-relaxed">
+                    Both text boxes will display in {currentLangLabel}.
+                  </p>
+                )}
               </div>
 
               <div className="space-y-4 pt-6">
