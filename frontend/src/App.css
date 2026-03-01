@@ -19,7 +19,8 @@
 
 html, body, #root { height: 100%; }
 
-body {
+
+body,html {
   margin: 0;
   font-family: Arial, sans-serif;
   color: var(--ink);
@@ -42,11 +43,11 @@ body {
 /* Center the whole card */
 .page {
   min-height: 100vh;
-  width: 100vw;              /* Code 2: includes scrollbar width */
+  width: 100vw;              /* Code 2: includes scrollbar width */ 
   display: flex;
   justify-content: center;
   align-items: flex-start;   /* Code 1 behavior */
-  padding: 80px 20px;        /* Code 1 spacing */
+  padding: 50px 20px;        /* Code 1 spacing */
 }
 
 /* OUTER (circled area) = dark brown */
