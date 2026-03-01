@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import FileUpload from "./FileUpload";
+import logoImg from "./assets/scu-logo.png";
+import goddessImg from "./assets/legal.png";
 
 const DEV_MODE = import.meta.env.VITE_DEV_MODE === "true";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
@@ -184,12 +186,30 @@ function App() {
   const translateDisabled = isLoading || isTyping || inputText.trim().length === 0;
 
   return (
-    <div className={`min-h-screen flex flex-col md:flex-row bg-legal-offwhite font-sans text-legal-charcoal ${isReadingMode ? "reading-mode" : ""}`}>
+    <div className={`min-h-screen flex flex-col md:flex-row bg-legal-offwhite font-sans text-legal-charcoal relative overflow-hidden ${isReadingMode ? "reading-mode" : ""}`}>
+      {/* Background Goddess Image */}
+      <div 
+        className="fixed inset-0 pointer-events-none opacity-[0.03] z-0"
+        style={{ 
+          backgroundImage: `url(${goddessImg})`,
+          backgroundSize: 'contain',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+
       {/* Sidebar/Header */}
-      <aside className="w-full md:w-80 bg-legal-navy text-white p-8 flex flex-col shrink-0">
+      <aside className="w-full md:w-80 bg-legal-navy text-white p-8 flex flex-col shrink-0 z-10">
         <div className="mb-auto">
-          <h1 className="text-4xl font-serif text-legal-gold mb-2 tracking-tight leading-tight">SimplyLegal</h1>
-          <p className="text-blue-200/60 text-sm font-medium mb-12 uppercase tracking-widest">Digital Counsel</p>
+          <div className="mb-8 flex items-center gap-4">
+            <div className="bg-white p-1 rounded-sm">
+              <img src={logoImg} alt="SCU Logo" className="w-12 h-12 object-contain" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-serif text-legal-gold tracking-tight leading-tight">SimplyLegal</h1>
+              <p className="text-[10px] text-blue-200/40 uppercase tracking-[0.2em] font-bold">SCU Digital Counsel</p>
+            </div>
+          </div>
           
           <nav className="space-y-6">
             <div className="space-y-2">
