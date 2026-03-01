@@ -301,7 +301,7 @@ function App() {
               )}
 
               <div className="pt-4">
-                <p className="text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-3">Upload Document</p>
+                <p className="text-sm uppercase tracking-widest font-bold text-gray-400 mb-4">Upload Document</p>
                 <FileUpload
                   onUploadSuccess={(file) => console.log('Uploaded:', file.name)}
                 />
