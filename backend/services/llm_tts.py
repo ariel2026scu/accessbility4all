@@ -30,7 +30,7 @@ class SimplyLegal_main:
             f":: Prompt: {input}"
         )
 
-        response = ollama.chat(model="deepseek-r1:7b", messages=[
+        response = ollama.chat(model="deepseek-r1:8b", messages=[
             {"role": "user", "content": system}
         ])
         return response["message"]["content"]
