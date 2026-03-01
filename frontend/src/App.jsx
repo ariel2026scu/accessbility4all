@@ -253,6 +253,23 @@ function App() {
       </aside>
 
       {/* Main Content */}
+      <img
+                src={goddessImg}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none select-none"
+                style={{
+                  position: "absolute",
+                  right: "0px",
+                  bottom: "60px",
+                  height: "420px",
+                  width: "auto",
+                  opacity: 0.15,
+                  zIndex: 0,
+                  objectFit: "contain",
+                  filter: "grayscale(10%) contrast(1.3) brightness(0.95)",
+                }}
+              />
       <main className="flex-1 p-6 md:p-12 lg:p-16 max-w-6xl mx-auto w-full overflow-y-auto">
         {DEV_MODE && (
           <div className="mb-8 p-4 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-widest rounded-sm">
@@ -350,9 +367,6 @@ function App() {
                   </button>
                 </div>
               </div>
-              <div className="flex justify-center mt-6">
-              <img src={goddessImg} alt="Lady Justice" style={{ width: "500px" }} className="opacity-80" />
-            </div>
             </section>
           </div>
 
