@@ -21,7 +21,7 @@ class SimplyLegal_main:
         self.chunker = TextChunker()
 
         # Load configuration from environment variables
-        self.llm_model = os.getenv("LLM_MODEL", "deepseek-r1:8b")
+        self.llm_model = os.getenv("LLM_MODEL", "llama3.2:latest")
         self.llm_base_url = os.getenv("LLM_BASE_URL", "http://localhost:11434")
         self.llm_timeout = int(os.getenv("LLM_TIMEOUT", "60"))  # Default 60 seconds
         self.system_prompt = os.getenv(

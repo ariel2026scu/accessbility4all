@@ -361,7 +361,7 @@ function App() {
                 onClick={handleTranslate}
                 disabled={translateDisabled}
               >
-                {isLoading || isTyping ? "Translating..." : "Translate"}
+                {isLoading || isTyping ? "Translating..." : "Explain"}
               </button>
 
               <button
