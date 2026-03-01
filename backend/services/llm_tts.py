@@ -24,11 +24,14 @@ user-unfriendly clauses.
 
 Analyze the following contract text and:
 
-1. Translate any complex legal jargon or Old English into simple, easy-to-understand \
-modern English.
-2. Identify all potential red flags, assuming the reader is an individual user or \
+1. Identify the language of the text. Throughout the simplification process, keep the original language. \
+    Ex: If the text is in Spanish, respond in Spanish. If the text is in English, respond in English. \
+    Do not translate the text to another language.
+2. Translate any complex legal jargon into simple, easy-to-understand \
+modern text in the original language.
+3. Identify all potential red flags, assuming the reader is an individual user or \
 small business with less bargaining power.
-3. Highlight clauses that:
+4. Highlight clauses that:
    - Limit legal rights
    - Shift liability
    - Allow unilateral changes
@@ -38,17 +41,16 @@ small business with less bargaining power.
    - Allow termination without notice
    - Create financial traps (auto-renewal, fees, penalties)
 
-Be conservative: if a clause could reasonably be harmful, mark it.
+Be conservative: if a clause could reasonably be harmful, mark it. 
 
 Respond with ONLY a valid JSON object — no markdown, no explanation, \
 no text outside the JSON:
-
 {
-  "simplified_text": "<plain-English translation of the full text>",
+  "simplified_text": "<plain-original-language translation of the full text>",
   "red_flags": [
     {
       "quote":      "<exact or near-exact quote of the risky clause>",
-      "risk":       "<plain-English explanation of the hidden risk>",
+      "risk":       "<plain-original-language explanation of the hidden risk>",
       "severity":   "high",
       "worst_case": "<realistic worst-case scenario for the user>"
     }
@@ -63,7 +65,8 @@ if triggered
 - "low":    worth reviewing but common in contracts; low probability of harm
 
 If there are no red flags use: "red_flags": []
-Reply in English only. Output ONLY the JSON object, nothing else.\
+Reply in the original language only. Output ONLY the valid JSON object, nothing else.\
+
 """
 
 
@@ -74,7 +77,7 @@ class SimplyLegal_main:
         self.chunker = TextChunker()
 
         # Allow full prompt override via env, otherwise use the structured default
-        self.system_prompt = os.getenv("TRANSLATION_SYSTEM_PROMPT") or _DEFAULT_SYSTEM_PROMPT
+        self.system_prompt = _DEFAULT_SYSTEM_PROMPT
 
         # Groq takes priority when an API key is configured
         groq_key = os.getenv("GROQ_API_KEY")
@@ -94,7 +97,7 @@ class SimplyLegal_main:
     # ------------------------------------------------------------------
 
     def _strip_think_tags(self, text: str) -> str:
-        """Remove <think>…</think> reasoning blocks."""
+        """Remove <think>…</think> reasoning blocks (DeepSeek-R1 etc.)."""
         return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
 
     def _ask_groq(self, prompt: str) -> str:
@@ -149,10 +152,10 @@ class SimplyLegal_main:
                         continue
                     # Accept both new schema (quote/risk/severity/worst_case)
                     # and old schema (text/risk_level) for backward compatibility
-                    quote     = str(f.get("quote") or f.get("text", "")).strip()
-                    risk      = str(f.get("risk", "")).strip()
-                    severity  = f.get("severity") or f.get("risk_level", "low")
-                    worst_case = str(f.get("worst_case", "")).strip()
+                    quote       = str(f.get("quote") or f.get("text", "")).strip()
+                    risk        = str(f.get("risk", "")).strip()
+                    severity    = f.get("severity") or f.get("risk_level", "low")
+                    worst_case  = str(f.get("worst_case", "")).strip()
 
                     if not quote:
                         continue
@@ -242,6 +245,11 @@ class SimplyLegal_main:
                 "chunks_processed": int,
             }
         """
+        
+        # check if text is in different language (spanish)
+        
+
+
         chunks = self.chunker.chunk_text(input_text)
         logger.info(f"Processing {len(chunks)} chunk(s)")
 
@@ -268,3 +276,5 @@ class SimplyLegal_main:
             "chunks_processed": len(chunks),
         }
 
+
+# process_text() -- ask_and_parse() -- _ask_groq()/_ask_ollama() -- _parse_llm_response()
