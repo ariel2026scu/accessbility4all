@@ -404,7 +404,14 @@ function App() {
             </div>
 
             <div className="outputBox" aria-live="polite">
-              {outputText.trim().length === 0 ? (
+              {isLoading ? (
+                <div className="skeleton-container">
+                  <div className="skeleton-line"></div>
+                  <div className="skeleton-line"></div>
+                  <div className="skeleton-line"></div>
+                  <div className="skeleton-line"></div>
+                </div>
+              ) : outputText.trim().length === 0 ? (
                 <div className="outputPlaceholder">
                   {DEV_MODE
                     ? "Start typing on the left to see the translation appear here."
