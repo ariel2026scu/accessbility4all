@@ -38,7 +38,7 @@ function truncateAtBoundary(text, limit) {
 }
 
 async function googleTranslate(text, targetLang) {
-  if (!text || !text.trim() || targetLang === "en") return text;
+  if (!text || !text.trim()) return text;
   if (!VITE_GOOGLE_TRANSLATE_KEY) {
     console.warn("VITE_GOOGLE_TRANSLATE_KEY not set — skipping translation");
     return text;
