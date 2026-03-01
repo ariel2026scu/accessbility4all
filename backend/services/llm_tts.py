@@ -1,8 +1,12 @@
 import os
+from dotenv import load_dotenv
 
 import ollama
 import pyttsx3
 import tempfile
+
+# Load environment variables from .env file
+load_dotenv()
 
 class SimplyLegal_main:
 
@@ -10,40 +14,29 @@ class SimplyLegal_main:
         self.engine = pyttsx3.init()
         self.is_busy = False
 
-    def ask_ai(self, input):
-        # Print the thinking status using the passed index and total
-        # print(f"thinking [{current_idx}-{self.total_submitted}]")
-        
-        self.is_busy = True
-
-        system = (
-            "You are translation app, translating complex legal jargon into simple, easy-to-understand language. "
-            "Be concise."
-            f":: Prompt: {input}"
+        # Load configuration from environment variables
+        self.llm_model = os.getenv("LLM_MODEL", "deepseek-r1:8b")
+        self.llm_base_url = os.getenv("LLM_BASE_URL", "http://localhost:11434")
+        self.system_prompt = os.getenv(
+            "TRANSLATION_SYSTEM_PROMPT",
+            "You are translation app, translating complex legal jargon into simple, easy-to-understand language. Be concise."
         )
 
-        response = ollama.chat(model="deepseek-r1:8b", messages=[
-            {"role": "user", "content": system}
-        ])
-        return response["message"]["content"]
-
-    def _run_tts(self, text):
+    def ask_ai(self, input):
+        """Translate text using LLM"""
+        self.is_busy = True
 
         try:
-            system = (
-                "You are translation app, translating complex legal jargon into simple, easy-to-understand language. "
-                "Be concise."
-                f":: Prompt: {input}"
-            )
+            system = f"{self.system_prompt}\n:: Prompt: {input}"
 
-            response = ollama.chat(model="deepseek-r1:8b", messages=[
-                {"role": "user", "content": system}
-            ])
+            response = ollama.chat(
+                model=self.llm_model,
+                messages=[{"role": "user", "content": system}]
+            )
             return response["message"]["content"]
-        
+
         except Exception as e:
             print(f"Error in ask_ai: {e}")
-            self.is_busy = False
             raise e
         finally:
             self.is_busy = False
