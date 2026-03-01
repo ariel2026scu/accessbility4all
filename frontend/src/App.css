@@ -18,10 +18,9 @@
 }
 
 .reading-mode .paper-card {
-  @apply shadow-none border-none p-0;
+  @apply shadow-none border-none;
 }
 
-.reading-mode textarea,
 .reading-mode .outputText {
   @apply text-2xl leading-loose;
 }
