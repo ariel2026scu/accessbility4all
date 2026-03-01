@@ -260,11 +260,11 @@ function App() {
                 className="pointer-events-none select-none"
                 style={{
                   position: "absolute",
-                  right: "0px",
-                  bottom: "60px",
+                  right: "120px",
+                  bottom: "50px",
                   height: "420px",
                   width: "auto",
-                  opacity: 0.15,
+                  opacity: 0.5,
                   zIndex: 0,
                   objectFit: "contain",
                   filter: "grayscale(10%) contrast(1.3) brightness(0.95)",
