@@ -18,6 +18,8 @@ function App() {
   const [apiError, setApiError] = useState(null);
   // "idle" | "playing" | "error"
   const [audioStatus, setAudioStatus] = useState("idle");
+  // [{ text: string, risk_level: "high"|"low" }]
+  const [redFlags, setRedFlags] = useState([]);
 
   // typing animation refs
   const typingTimerRef = useRef(null);
@@ -155,10 +157,15 @@ function App() {
     setIsLoading(true);
 
     if (DEV_MODE) {
-      // Dev mode: mock translation (animated)
+      // Dev mode: mock translation + mock red flags (animated)
       setTimeout(() => {
         const result = fakeTranslate(inputText, mode);
         startTyping(result);
+        setRedFlags([
+          { text: "The Company may modify these terms at any time without prior notice to the user.", risk_level: "high" },
+          { text: "All disputes shall be resolved through binding arbitration, waiving the right to a jury trial.", risk_level: "high" },
+          { text: "The user agrees to indemnify the Company against any third-party claims.", risk_level: "low" },
+        ]);
         setIsLoading(false);
       }, 450);
       return;
@@ -180,6 +187,7 @@ function App() {
       const data = await response.json();
       startTyping(data.text || "");
       setAudioData(data.audio ?? null);
+      setRedFlags(data.red_flags ?? []);
     } catch (error) {
       setApiError(error.message);
       stopTyping();
@@ -197,6 +205,7 @@ function App() {
     setAudioData(null);
     setApiError(null);
     setAudioStatus("idle");
+    setRedFlags([]);
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     window.speechSynthesis.cancel();
     targetRef.current = "";
@@ -217,6 +226,7 @@ function App() {
     setAudioData(null);
     setApiError(null);
     setAudioStatus("idle");
+    setRedFlags([]);
     targetRef.current = "";
   }
 
@@ -493,6 +503,24 @@ function App() {
             )}
           </section>
         </div>
+
+        {redFlags.length > 0 && (
+          <section className="redFlagsSection">
+            <h3 className="redFlagsTitle">
+              ⚠️ Red Flags Detected ({redFlags.length})
+            </h3>
+            <div className="redFlagsList">
+              {redFlags.map((flag, i) => (
+                <div key={i} className={`redFlagCard ${flag.risk_level}`}>
+                  <span className={`riskBadge ${flag.risk_level}`}>
+                    {flag.risk_level === "high" ? "HIGH RISK" : "LOW RISK"}
+                  </span>
+                  <p className="redFlagText">{flag.text}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <footer className="footer">
           <div className="footerNote">

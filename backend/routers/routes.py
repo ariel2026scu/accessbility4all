@@ -69,10 +69,11 @@ async def get_llm_output(request: LLMRequest):
 
         logger.info("Request processed successfully")
         return {
-            "text": result["text"],
-            "audio": audio_b64,
+            "text":             result["text"],
+            "red_flags":        result.get("red_flags", []),
+            "audio":            audio_b64,
             "chunks_processed": result.get("chunks_processed", 1),
-            "status": "success"
+            "status":           "success",
         }
 
     except HTTPException:
