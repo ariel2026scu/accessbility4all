@@ -309,7 +309,7 @@ function App() {
 
     const detectTimer = setTimeout(() => {
       setIsAutoTranslating(true);
-    }, 500);
+    }, 300);
 
     inputDebounceRef.current = setTimeout(async () => {
       try {
@@ -320,7 +320,7 @@ function App() {
       } finally {
         setIsAutoTranslating(false);
       }
-    }, 1000);
+    }, 2500);
 
     return () => {
       clearTimeout(detectTimer);
