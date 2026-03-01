@@ -340,7 +340,7 @@ function App() {
                   onChange={(e) => setMode(e.target.value)}
                   className="w-full bg-blue-900/30 border border-blue-800 rounded-sm p-3 text-sm focus:outline-none focus:border-legal-gold transition-colors"
                 >
-                  <option value="legal">Legalese → Plain English</option>
+                  <option value="legal">Legalese → Plain Language</option>
                 </select>
               </div>
 
@@ -460,17 +460,27 @@ function App() {
                     Please keep the input under {MAX_WORDS.toLocaleString()} words.
                   </div>
                 )}
-                <div className="bg-gray-50 p-4 border-t border-gray-100 flex items-center gap-3">
+                <div className="bg-gray-50 px-6 py-4 border-t border-gray-100 flex items-center gap-3">
                   <button
                     onClick={() => handleTranslate()}
                     disabled={translateDisabled || tooManyWords}
-                    className="px-6 py-2 bg-legal-navy text-white text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors disabled:opacity-50">
-                    {tooManyWords ? "Too long" : isLoading || isTyping ? "Analyzing..." : "Simplify"}
+                    className="flex items-center gap-2 px-6 py-2 bg-legal-navy text-white text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors disabled:opacity-50"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                        d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/>
+                    </svg>
+                    Simplify
                   </button>
 
                   <button
                     onClick={handleClear}
-                    className="px-6 py-2 border border-gray-400 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors">
+                    className="flex items-center gap-2 px-6 py-2 border border-gray-400 text-gray-500 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                        d="M6 7h12M9 7V4h6v3m-8 0v13h10V7"/>
+                    </svg>
                     Clear
                   </button>
 
@@ -518,7 +528,7 @@ function App() {
             {/* Output Section */}
             <section className="space-y-6">
               <div className="flex items-end justify-between border-b border-gray-200 pb-4">
-                <h2 className="text-2xl font-serif text-legal-navy">Plain Interpretation</h2>
+                <h2 className="text-2xl font-serif text-legal-navy">Plain Translation</h2>
                 <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400">Revision 1.0</span>
               </div>
 
@@ -547,16 +557,24 @@ function App() {
                   <button
                     onClick={handleReadAloud}
                     disabled={!outputText}
-                    className="px-6 py-2 border border-legal-gold text-legal-gold text-xs font-bold uppercase tracking-widest hover:bg-legal-gold hover:text-legal-navy transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-2 border border-legal-gold text-legal-gold text-xs font-bold uppercase tracking-widest hover:bg-legal-gold hover:text-legal-navy transition-colors disabled:opacity-50"
                   >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                        d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                    </svg>
                     Read
                   </button>
 
                   <button
                     onClick={handleCopy}
                     disabled={!outputText}
-                    className="px-6 py-2 border border-gray-400 text-gray-500 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-2 border border-gray-400 text-gray-500 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors disabled:opacity-50"
                   >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                        d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5h8v4H8z"/>
+                    </svg>
                     {copied ? "Copied" : "Copy"}
                   </button>
                 </div>
