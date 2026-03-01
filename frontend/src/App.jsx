@@ -187,25 +187,27 @@ function App() {
 
   return (
     <div className={`min-h-screen flex flex-col md:flex-row bg-legal-offwhite font-sans text-legal-charcoal relative overflow-hidden ${isReadingMode ? "reading-mode" : ""}`}>
-      {/* Sidebar/Header */}
-      <aside className="relative w-full md:w-80 bg-legal-navy text-white p-8 flex flex-col shrink-0 z-10 overflow-hidden">
-        {/* Background Goddess Image for Sidebar */}
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-64 pointer-events-none opacity-10 z-0"
-          style={{ 
-            backgroundImage: `url(${goddessImg})`,
-            backgroundSize: 'contain',
-            backgroundPosition: 'bottom center',
-            backgroundRepeat: 'no-repeat',
-            mixBlendMode: 'soft-light'
-          }}
-        />
+      {/* Background Watermark Goddess Image (Seamless Right Side) */}
+      <div 
+        className="fixed bottom-0 right-0 md:left-80 left-0 h-screen pointer-events-none opacity-[0.04] z-0 select-none overflow-hidden"
+        style={{ 
+          backgroundImage: `url(${goddessImg})`,
+          backgroundSize: 'contain',
+          backgroundPosition: 'bottom right',
+          backgroundRepeat: 'no-repeat',
+          filter: 'grayscale(100%)',
+          WebkitMaskImage: 'radial-gradient(circle at bottom right, black 20%, transparent 80%)',
+          maskImage: 'radial-gradient(circle at bottom right, black 20%, transparent 80%)'
+        }}
+      />
 
+      {/* Sidebar/Header */}
+      <aside className="relative w-full md:w-80 bg-legal-navy text-white p-8 flex flex-col shrink-0 z-10 overflow-hidden shadow-2xl">
         <div className="relative z-10 flex flex-col h-full">
           <div className="mb-auto">
             <div className="mb-8 flex items-center gap-4">
-              <div className="bg-white p-1 rounded-sm">
-                <img src={logoImg} alt="SCU Logo" className="w-12 h-12 object-contain" />
+              <div className="bg-white rounded-full overflow-hidden border-2 border-legal-gold/50 shadow-inner p-0">
+                <img src={logoImg} alt="SCU Logo" className="w-14 h-14 object-cover" />
               </div>
               <div>
                 <h1 className="text-2xl font-serif text-legal-gold tracking-tight leading-tight">SimplyLegal</h1>
