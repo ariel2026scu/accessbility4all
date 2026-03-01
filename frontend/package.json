@@ -10,9 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/model-viewer": "^4.1.0",
+    "@webspatial/core-sdk": "^1.2.0",
+    "@webspatial/react-sdk": "^1.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "tailwindcss": "^4.2.1"
+    "tailwindcss": "^4.2.1",
+    "three": "^0.172.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -20,10 +24,14 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "@webspatial/builder": "^1.2.0",
+    "@webspatial/platform-visionos": "^1.2.0",
+    "@webspatial/vite-plugin": "^1.0.1",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vite-plugin-html": "^3.2.2"
   }
 }

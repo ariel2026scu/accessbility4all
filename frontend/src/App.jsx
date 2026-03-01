@@ -71,10 +71,12 @@ function App() {
   const [redFlags, setRedFlags] = useState([]);
   const [uploadInfo, setUploadInfo] = useState(null);
   const [wordLimitHit, setWordLimitHit] = useState(false);
+  const [isAutoTranslating, setIsAutoTranslating] = useState(false);
 
   const [uiLang, setUiLang] = useState("en");
   const [isTranslatingLang, setIsTranslatingLang] = useState(false);
 
+  const inputDebounceRef = useRef(null);
   const typingTimerRef = useRef(null);
   const debounceRef = useRef(null);
   const targetRef = useRef("");
@@ -299,6 +301,34 @@ function App() {
     return () => clearTimeout(debounceRef.current);
   }, [inputText, mode]);
 
+  useEffect(() => {
+    if (uiLang === "en") return;
+    if (!inputText.trim()) return;
+
+    if (inputDebounceRef.current) clearTimeout(inputDebounceRef.current);
+
+    const detectTimer = setTimeout(() => {
+      setIsAutoTranslating(true);
+    }, 500);
+
+    inputDebounceRef.current = setTimeout(async () => {
+      try {
+        const translated = await googleTranslate(inputText, uiLang);
+        if (translated !== inputText) {
+          setInputText(translated);
+        }
+      } finally {
+        setIsAutoTranslating(false);
+      }
+    }, 1000);
+
+    return () => {
+      clearTimeout(detectTimer);
+      clearTimeout(inputDebounceRef.current);
+      setIsAutoTranslating(false);
+    };
+  }, [inputText, uiLang]);
+
   const translateDisabled = isLoading || isTyping || inputText.trim().length === 0;
   const currentLangLabel = LANGUAGES.find(l => l.code === uiLang)?.label ?? "English";
 
@@ -438,6 +468,12 @@ function App() {
               </div>
               
               <div className="paper-card p-0 overflow-hidden">
+                {isAutoTranslating && (
+                  <div className="px-8 py-3 bg-blue-50 border-b border-blue-100 flex items-center gap-3 text-xs text-blue-700 font-medium">
+                    <span className="inline-block w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin shrink-0" />
+                    Auto detecting and translating language…
+                  </div>
+                )}
                 <textarea
                   value={inputText}
                   onChange={(e) => {
