@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
+import FileUpload from "./FileUpload";
 
 const DEV_MODE = import.meta.env.VITE_DEV_MODE === "true";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
@@ -374,6 +375,10 @@ function App() {
             Translate legalese or old English into clear, readable language.
           </p>
         </header>
+
+        <div className="my-8">
+          <FileUpload onUploadSuccess={(file) => console.log('File uploaded:', file.name)} />
+        </div>
 
         <div className="controlsTop">
           <div className="selectWrap">
