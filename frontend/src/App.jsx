@@ -349,7 +349,7 @@ function App() {
       />
 
       {/* Sidebar/Header */}
-      <aside className="fixed left-0 top-0 h-screen w-full md:w-80 bg-legal-navy text-white p-8 flex flex-col z-30 shadow-2xl">
+      <aside className="fixed left-0 top-0 h-screen w-64 sm:w-80 bg-legal-navy text-white p-8 flex flex-col z-30 shadow-2xl">
         <div className="relative z-10 flex flex-col h-full">
           <div className="mb-auto">
             <div className="mb-8 flex items-center gap-4">
@@ -450,7 +450,7 @@ function App() {
                   filter: "grayscale(10%) contrast(1.3) brightness(0.95)",
                 }}
               />
-      <main className="flex-1 ml-0 md:ml-80 p-6 md:p-12 lg:p-16 max-w-6xl mx-auto w-full overflow-y-auto">
+      <main className="flex-1 ml-64 sm:ml-80 p-6 md:p-12 lg:p-16 max-w-6xl mx-auto w-full overflow-y-auto">
         {DEV_MODE && (
           <div className="mb-8 p-4 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-widest rounded-sm">
             ⚙️ Dev Mode — mock translation active
