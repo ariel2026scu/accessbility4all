@@ -281,7 +281,7 @@ function App() {
                   <button onClick={() => handleTranslate()} disabled={translateDisabled} className="px-6 py-2 bg-legal-navy text-white text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors disabled:opacity-50">
                     {isLoading || isTyping ? "Analyzing..." : "Simplify"}
                   </button>
-                  <button onClick={handleClear} className="px-6 py-2 border border-gray-200 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors">
+                  <button onClick={handleClear} className="px-6 py-2 border border-gray-400 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors">
                     Clear
                   </button>
                 </div>
@@ -301,7 +301,7 @@ function App() {
               )}
 
               <div className="pt-4">
-                <p className="text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-3">Upload Document</p>
+                <p className="text-sm uppercase tracking-widest font-bold text-gray-400 mb-4">Upload Document</p>
                 <FileUpload
                   onUploadSuccess={(file) => console.log('Uploaded:', file.name)}
                 />

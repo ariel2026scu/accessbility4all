@@ -94,7 +94,7 @@ class SimplyLegal_main:
     # ------------------------------------------------------------------
 
     def _strip_think_tags(self, text: str) -> str:
-        """Remove <think>…</think> reasoning blocks (DeepSeek-R1 etc.)."""
+        """Remove <think>…</think> reasoning blocks."""
         return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
 
     def _ask_groq(self, prompt: str) -> str:
@@ -267,3 +267,4 @@ class SimplyLegal_main:
             "audio":            audio_bytes,
             "chunks_processed": len(chunks),
         }
+
