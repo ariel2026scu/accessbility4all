@@ -346,6 +346,9 @@ function App() {
                   </button>
                 </div>
               </div>
+              <div className="flex justify-center mt-6">
+              <img src={goddessImg} alt="Lady Justice" style={{ width: "500px" }} className="opacity-80" />
+            </div>
             </section>
           </div>
 
