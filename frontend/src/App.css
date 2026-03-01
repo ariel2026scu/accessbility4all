@@ -1,42 +1,324 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* Dark courtroom vibe (outer) + white “document” panels (inner) */
+:root {
+  --bg1: #403829;     /* almost black */
+  --bg2: #827665;     /* deep brown/charcoal */
+
+  /* kept for buttons/accents */
+  --border: #2a241d;
+  --ink: #e9e4da;
+  --muted: #b7ad9f;
+  --gold: #b79a58;
+  --danger: #7b2d2d;
+
+  /* no longer used for panels, but safe to keep */
+  --paper: #141210;
+  --paper2: #1b1815;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+* {
+  box-sizing: border-box;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+html, body, #root {
+  height: 100%;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: var(--ink);
+  background: radial-gradient(1200px 600px at 20% 10%, #201a13, transparent),
+    radial-gradient(1200px 600px at 80% 0%, #12100d, transparent),
+    linear-gradient(180deg, var(--bg2), var(--bg1));
+  min-height: 100vh;
 }
 
+/* Center the whole PlainSpeak card */
+.page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;   /* important */
+  padding: 80px 20px;        /* creates visual centering */
+}
+
+/* OUTER (circled area) = dark brown */
 .card {
-  padding: 2em;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #92765d;
+  border: 1px solid #3a2a1c;
+  border-radius: 14px;
+  padding: 30px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
 }
 
-.read-the-docs {
-  color: #888;
+.header {
+  text-align: center;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(231, 220, 205, 0.12);
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid rgba(231, 220, 205, 0.18);
+  border-radius: 999px;
+  color: #d6c8b6;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.title {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 56px;
+  letter-spacing: 0.5px;
+  color: #f3ede3;
+}
+
+.subtitle {
+  margin: 10px 0 0;
+  color: #d6c8b6;
+  font-size: 16px;
+}
+
+/* top controls */
+.controlsTop {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.selectWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  color: #d6c8b6;
+}
+
+select {
+  background: rgba(0, 0, 0, 0.18);
+  color: #f3ede3;
+  border: 1px solid rgba(231, 220, 205, 0.2);
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+}
+
+select:focus {
+  border-color: rgba(183, 154, 88, 0.9);
+  box-shadow: 0 0 0 3px rgba(183, 154, 88, 0.18);
+}
+
+.exampleBtns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* INNER (panels) = white “document” look */
+.panel {
+  background: #e3d2bb;
+  border: 1px solid #e5e0d8;
+  border-radius: 12px;
+  padding: 16px;
+  color: #222;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.panelHeader h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  color: #2b1f14;
+}
+
+.panelHint {
+  color: #555;
+  font-size: 13px;
+}
+
+/* textarea readable on white */
+textarea {
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+  background: #f9f7f4;
+  color: #222;
+  border: 1px solid #d8d2c9;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+  outline: none;
+}
+
+textarea:focus {
+  border-color: rgba(183, 154, 88, 0.9);
+  box-shadow: 0 0 0 3px rgba(183, 154, 88, 0.18);
+}
+
+/* buttons */
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: 1px solid rgba(231, 220, 205, 0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform 0.05s ease, opacity 0.15s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Primary button stays “courtroom” */
+.btnPrimary {
+  background: linear-gradient(180deg, #2a241d, #1b1712);
+  color: #f3ede3;
+  border-color: rgba(183, 154, 88, 0.55);
+}
+
+.btnPrimary:hover {
+  border-color: rgba(183, 154, 88, 0.95);
+}
+
+/* Ghost buttons: work on both dark and white sections */
+.btnGhost {
+  background: transparent;
+  color: inherit;
+  border-color: rgba(183, 154, 88, 0.35);
+}
+
+.btnGhost:hover {
+  border-color: rgba(183, 154, 88, 0.75);
+}
+
+/* Clear button */
+.btnDanger {
+  background: transparent;
+  color: #7b2d2d;
+  border-color: rgba(123, 45, 45, 0.55);
+}
+
+.btnDanger:hover {
+  border-color: rgba(123, 45, 45, 0.9);
+}
+
+/* output box matches white style */
+.outputBox {
+  min-height: 220px;
+  background: #f9f7f4;
+  border: 1px dashed #b79a58;
+  border-radius: 10px;
+  padding: 12px;
+  color: #222;
+}
+
+.outputPlaceholder {
+  color: #666;
+  font-style: italic;
+}
+
+.outputText {
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+/* hard words chips */
+.hardWords {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e0d8;
+}
+
+.hardWordsTitle {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.hardWordsEmpty {
+  color: #666;
+  font-style: italic;
+  font-size: 14px;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(183, 154, 88, 0.55);
+  background: rgba(183, 154, 88, 0.12);
+  color: #2b1f14;
+  font-size: 13px;
+}
+
+/* footer readable on dark brown */
+.footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(231, 220, 205, 0.12);
+}
+
+.footerNote {
+  color: #d4c8b8;
+  font-size: 13px;
+}
+
+/* screen-reader only */
+.srOnly {
+  position: absolute;
+  left: -9999px;
 }
