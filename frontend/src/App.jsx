@@ -441,7 +441,7 @@ function App() {
                 style={{
                   position: "absolute",
                   right: "120px",
-                  bottom: "50px",
+                  bottom: "0px",
                   height: "420px",
                   width: "auto",
                   opacity: 0.5,
