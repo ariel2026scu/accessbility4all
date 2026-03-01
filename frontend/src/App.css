@@ -1,16 +1,17 @@
-/* Dark courtroom vibe (outer) + white “document” panels (inner) */
+/* Dark courtroom vibe panels */
 :root {
-  --bg1: #403829;     /* almost black */
-  --bg2: #827665;     /* deep brown/charcoal */
+  /* Main background colors */
+  --bg1: #403829; 
+  --bg2: #827665; 
 
-  /* accents */
+  /* Text and accent colors */
   --border: #2a241d;
   --ink: #e9e4da;
   --muted: #b7ad9f;
   --gold: #b79a58;
   --danger: #7b2d2d;
 
-  /* safe to keep */
+  /* Extra panel colors*/
   --paper: #141210;
   --paper2: #1b1815;
 }
@@ -19,13 +20,12 @@
 
 html, body, #root { height: 100%; }
 
-
+/* Page background */
 body,html {
   margin: 0;
   font-family: Arial, sans-serif;
   color: var(--ink);
 
-  /* combine both background approaches */
   background:
     radial-gradient(1200px 600px at 20% 10%, #201a13, transparent),
     radial-gradient(1200px 600px at 80% 0%, #12100d, transparent),
@@ -34,27 +34,25 @@ body,html {
     linear-gradient(180deg, var(--bg2), var(--bg1));
 
   min-height: 100vh;
-
-  /* Code 2 fix: prevents horizontal jiggle + keeps centering stable */
   overflow-x: hidden;
   overflow-y: scroll;
 }
 
-/* Center the whole card */
+/* Main layout wrapper */
 .page {
   min-height: 100vh;
-  width: 100vw;              /* Code 2: includes scrollbar width */ 
+  width: 100vw;
   display: flex;
   justify-content: center;
-  align-items: flex-start;   /* Code 1 behavior */
-  padding: 50px 20px;        /* Code 1 spacing */
+  align-items: flex-start;
+  padding: 80px 20px;
 }
 
-/* OUTER (circled area) = dark brown */
+/* Main card container */
 .card {
-  width: 1100px;     /* Code 2 explicit width */
-  max-width: 100%;   /* Code 2 important for responsiveness */
-  margin: 0 auto;    /* Code 2 guarantees horizontal centering */
+  width: 1100px;
+  max-width: 100%;
+  margin: 0 auto;
 
   background: #92765d;
   border: 1px solid #3a2a1c;
@@ -62,21 +60,28 @@ body,html {
   padding: 30px;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
 
-  overflow-x: hidden; /* Code 2 */
+  overflow-x: hidden;
 }
 
+/* Headers */
 .header {
   text-align: center;
   padding-bottom: 18px;
   border-bottom: 1px solid rgba(231, 220, 205, 0.12);
 }
 
-/* Code 1: header top toggle row */
 .headerTop {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 20px; 
+}
+
+.headerTop .btnToggle {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 
 .btnToggle {
@@ -163,18 +168,85 @@ body,html {
   }
 }
 
+/* Shimmer Animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.skeleton-line {
+  height: 18px;
+  width: 100%;
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* Courtroom mode shimmer (darker) */
+.card:not(.reading-mode) .skeleton-line {
+  background: linear-gradient(90deg, #d8ccb9 25%, #e6dfd3 50%, #d8ccb9 75%);
+  background-size: 200% 100%;
+}
+
+.skeleton-line:nth-child(2) { width: 90%; }
+.skeleton-line:nth-child(3) { width: 95%; }
+.skeleton-line:nth-child(4) { width: 70%; }
+
+/* Enhanced Responsiveness */
+@media (max-width: 600px) {
+  .page {
+    padding: 20px 10px;
+  }
+  
+  .card {
+    padding: 20px 15px;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .reading-mode .title {
+    font-size: 42px;
+  }
+
+  .controlsTop {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .exampleBtns {
+    justify-content: center;
+  }
+
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Courtmode Badge */
 .badge {
   display: inline-block;
+  margin: 0;
   padding: 6px 12px;
-  border: 1px solid rgba(231, 220, 205, 0.18);
+  border: 2px solid rgba(237, 230, 219, 0.18);
   border-radius: 999px;
-  color: #d6c8b6;
+  color: #e8ddce;
   font-size: 12px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  margin-bottom: 10px;
 }
 
+/* Main Title */
 .title {
   margin: 0;
   font-family: Georgia, "Times New Roman", serif;
@@ -189,7 +261,7 @@ body,html {
   font-size: 16px;
 }
 
-/* top controls */
+/* Controls Section */
 .controlsTop {
   margin-top: 18px;
   width: 100%;
@@ -200,6 +272,7 @@ body,html {
   align-items: end;
 }
 
+/* Dropdown + label layout */
 .selectWrap {
   display: flex;
   flex-direction: column;
@@ -232,8 +305,6 @@ select:focus {
   flex-wrap: wrap;
 }
 
-/* grid */
-/* Use Code 2 minmax(0,1fr) to prevent overflow in grid children */
 .grid {
   margin-top: 18px;
   width: 100%;
@@ -242,20 +313,15 @@ select:focus {
   gap: 16px;
 }
 
-/* Code 2 fix: allow children to shrink instead of overflow */
-.panel { min-width: 0; width: 100%; }
-
+/* Stack panels on smaller screens */
 @media (max-width: 900px) {
   .grid { grid-template-columns: 1fr; }
 }
 
-/* Code 2 had 1500px breakpoint; keep it if you want earlier stacking */
-@media (max-width: 1500px) {
-  .grid { grid-template-columns: 1fr; }
-}
-
-/* INNER (panels) = white “document” look */
+/* Prevent overflow inside grid */
 .panel {
+  min-width: 0; 
+  width: 100%; 
   background: #e3d2bb;
   border: 1px solid #e5e0d8;
   border-radius: 12px;
@@ -283,7 +349,7 @@ select:focus {
   font-size: 13px;
 }
 
-/* textarea readable on white */
+/* Text Areas */
 textarea {
   width: 100%;
   min-height: 220px;
@@ -303,7 +369,6 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(183, 154, 88, 0.18);
 }
 
-/* buttons */
 .actions {
   display: flex;
   gap: 10px;
@@ -311,6 +376,7 @@ textarea:focus {
   flex-wrap: wrap;
 }
 
+/* Buttons */
 .btn {
   border: 1px solid rgba(231, 220, 205, 0.25);
   border-radius: 10px;
@@ -323,25 +389,22 @@ textarea:focus {
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* Primary button stays “courtroom” */
 .btnPrimary {
-  background: linear-gradient(180deg, #2a241d, #1b1712);
+  background: #423220;
   color: #f3ede3;
-  border-color: rgba(183, 154, 88, 0.55);
+  border-color: rgba(93, 71, 21, 0.55);
 }
 
-.btnPrimary:hover { border-color: rgba(183, 154, 88, 0.95); }
+.btnPrimary:hover { background-color: rgba(132, 113, 81, 0.95); }
 
-/* Ghost buttons */
 .btnGhost {
   background: transparent;
   color: inherit;
-  border-color: rgba(183, 154, 88, 0.35);
+  border-color: rgba(91, 72, 27, 0.35);
 }
 
-.btnGhost:hover { border-color: rgba(183, 154, 88, 0.75); }
+.btnGhost:hover { border-color: rgba(84, 57, 15, 0.75); }
 
-/* Clear button */
 .btnDanger {
   background: transparent;
   color: #7b2d2d;
@@ -350,7 +413,7 @@ textarea:focus {
 
 .btnDanger:hover { border-color: rgba(123, 45, 45, 0.9); }
 
-/* output box matches white style */
+/* Output Area */
 .outputBox {
   min-height: 220px;
   background: #f9f7f4;
@@ -370,7 +433,6 @@ textarea:focus {
   line-height: 1.55;
 }
 
-/* Code 2: cursor animation kept */
 .cursor {
   display: inline-block;
   margin-left: 2px;
@@ -379,7 +441,6 @@ textarea:focus {
 
 @keyframes blink { 50% { opacity: 0; } }
 
-/* hard words chips */
 .hardWords {
   margin-top: 12px;
   padding-top: 12px;
@@ -414,11 +475,11 @@ textarea:focus {
   font-size: 13px;
 }
 
-/* footer */
 .footer {
   margin-top: 18px;
   padding-top: 14px;
   border-top: 1px solid rgba(231, 220, 205, 0.12);
+  text-align: center;
 }
 
 .footerNote {
@@ -431,7 +492,7 @@ textarea:focus {
   left: -9999px;
 }
 
-/* Reading Mode Adjustments (Code 1) */
+/* Reading Mode */
 .reading-mode.page {
   padding: 40px 20px;
   background: #fdfdfd !important;
@@ -457,6 +518,8 @@ textarea:focus {
   color: #fff;
   border-color: #000;
   font-size: 18px;
+  position: absolute;
+  right: 0;
 }
 
 .reading-mode .badge,
@@ -526,7 +589,6 @@ textarea:focus {
   color: #000;
 }
 
-/* ── Dev mode banner (Code 1) ── */
 .devBanner {
   position: fixed;
   top: 0;

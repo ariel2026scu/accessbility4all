@@ -9,8 +9,8 @@ function App() {
   const [mode, setMode] = useState("legal");
 
   const [outputText, setOutputText] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // backend / dev mock delay
-  const [isTyping, setIsTyping] = useState(false);   // typing animation
+  const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
   const [copied, setCopied] = useState(false);
   const [isReadingMode, setIsReadingMode] = useState(false);
@@ -61,7 +61,7 @@ function App() {
     return found;
   }, [inputText]);
 
-  // Dev-mode mock translation (no backend required)
+  // Dev-mode mock translation 
   function fakeTranslate(text, currentMode) {
     let result = text;
 
@@ -97,7 +97,7 @@ function App() {
     setIsTyping(false);
   }
 
-  // Only animate the "new" part if user is just appending
+  // Only animate the new part if user is just appending
   function startTyping(fullText) {
     if (fullText === targetRef.current) return;
     targetRef.current = fullText;
@@ -145,7 +145,7 @@ function App() {
     setAudioData(null);
     setAudioStatus("idle");
 
-    // don’t translate empty
+    // don’t translate empty text box
     if (inputText.trim().length === 0) {
       stopTyping();
       setOutputText("");
@@ -155,7 +155,7 @@ function App() {
     setIsLoading(true);
 
     if (DEV_MODE) {
-      // Dev mode: mock translation (animated)
+      // Dev mode: mock translation 
       setTimeout(() => {
         const result = fakeTranslate(inputText, mode);
         startTyping(result);
@@ -284,7 +284,7 @@ function App() {
     }
   }
 
-  // DEV_MODE: auto-translate while typing (debounced) like your “second” version
+  // DEV_MODE: auto translate while typing (debounced) 
   useEffect(() => {
     if (!DEV_MODE) return;
 
@@ -304,7 +304,6 @@ function App() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText, mode]);
 
   useEffect(() => {
@@ -312,7 +311,6 @@ function App() {
       stopTyping();
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const translateDisabled =
