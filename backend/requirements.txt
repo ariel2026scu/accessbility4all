@@ -28,6 +28,7 @@ pydantic-extra-types==2.11.0
 pydantic-settings==2.13.1
 pydantic_core==2.41.5
 Pygments==2.19.2
+pypdf==6.7.4
 python-dotenv==1.2.1
 python-multipart==0.0.22
 pyttsx3==2.99
@@ -46,3 +47,4 @@ urllib3==2.6.3
 uvicorn==0.41.0
 watchfiles==1.1.1
 websockets==16.0
+
