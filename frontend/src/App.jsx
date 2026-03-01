@@ -202,9 +202,7 @@ function App() {
       <aside className="w-full md:w-80 bg-legal-navy text-white p-8 flex flex-col shrink-0 z-10">
         <div className="mb-auto">
           <div className="mb-8 flex items-center gap-4">
-            <div className="bg-white p-1 rounded-sm">
-              <img src={logoImg} alt="SCU Logo" className="w-12 h-12 object-contain" />
-            </div>
+            <img src={logoImg} alt="SCU Logo" className="w-25 h-25 object-contain" />
             <div>
               <h1 className="text-2xl font-serif text-legal-gold tracking-tight leading-tight">SimplyLegal</h1>
               <p className="text-[10px] text-blue-200/40 uppercase tracking-[0.2em] font-bold">SCU Digital Counsel</p>
