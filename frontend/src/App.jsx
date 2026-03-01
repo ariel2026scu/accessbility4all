@@ -383,7 +383,7 @@ function App() {
                 <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400">Revision 1.0</span>
               </div>
 
-              <div className="paper-card p-8 min-h-[300px] relative">
+              <div className="paper-card p-8 min-h-[300px] max-h-[60vh] overflow-y-auto relative">
                 {isLoading ? (
                   <div className="space-y-4">
                     <div className="h-4 bg-gray-100 animate-pulse w-full"></div>
@@ -392,7 +392,7 @@ function App() {
                     <div className="h-4 bg-gray-100 animate-pulse w-2/3"></div>
                   </div>
                 ) : outputText ? (
-                  <div className="text-lg leading-[1.8] text-legal-charcoal whitespace-pre-wrap">
+                  <div className="text-lg leading-[1.8] text-legal-charcoal whitespace-pre-wrap pb-16">
                     {outputText}
                     {isTyping && <span className="inline-block w-1.5 h-5 bg-legal-gold ml-1 animate-pulse"></span>}
                   </div>
