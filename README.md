@@ -1,4 +1,4 @@
-#SimplyLegal
+# SimplyLegal
 
 SimplyLegal is a web application that translates complex legal language into clear, modern English.
 
