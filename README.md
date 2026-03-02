@@ -1,4 +1,5 @@
 #SimplyLegal
+
 SimplyLegal is a web application that translates complex legal language into clear, modern English.
 
 Features include legal text simplification, multi-language translation, text-to-speech (read aloud), PDF export, document upload, and due diligence risk alerts.
